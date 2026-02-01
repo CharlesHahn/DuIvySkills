@@ -52,40 +52,47 @@ dit ndx_add -h
 
 ### XVG Files (Data Plots)
 
-- `xvg_show` - Display XVG data (simplest, shows all columns)
-- `xvg_compare` - Compare multiple XVG files with flexible column selection
-- `xvg_ave` - Calculate average, std dev, std err for each column
-- `xvg_show_distribution` - Show data distribution (histogram/PDF/CDF)
-- `xvg_show_stack` - Stacked area plots (e.g., secondary structure content)
-- `xvg_show_scatter` - Scatter plots (2D or 3D with color mapping)
-- `xvg_box_compare` - Violin + scatter plots for distribution comparison
-- `xvg_combine` - Combine data from multiple XVG files into one
-- `xvg_ave_bar` - Calculate averages across parallel experiments
-- `xvg_rama` - Ramachandran plots from phi/psi angles
-- `xvg_energy_compute` - Calculate protein-ligand interaction energies
+| Command | Description |
+|---------|-------------|
+| `xvg_show` | Display XVG data with customizable visualization |
+| `xvg_compare` | Compare multiple XVG files with flexible column selection |
+| `xvg_ave` | Calculate average, std dev, std err for each column |
+| `xvg_show_distribution` | Show data distribution as histogram/PDF/CDF |
+| `xvg_show_stack` | Display stacked area plots for multiple data series |
+| `xvg_show_scatter` | Create scatter plots (2D or 3D with color mapping) |
+| `xvg_box_compare` | Compare distributions using violin and scatter plots |
+| `xvg_combine` | Combine data from multiple XVG files into one |
+| `xvg_ave_bar` | Calculate and display averages across parallel experiments |
+| `xvg_rama` | Draw Ramachandran plots from phi/psi angle data |
+| `xvg_energy_compute` | Calculate protein-ligand interaction energies |
 
 ### XPM Files (Matrix/Heatmaps)
 
-- `xpm_show` - Visualize XPM matrices (4 engines: matplotlib/plotly/gnuplot/plotext)
-- `xpm2csv` - Convert XPM to CSV format (x, y, value)
-- `xpm2dat` - Convert XPM to M×N matrix format
-- `xpm_diff` - Calculate difference between two XPM files
-- `xpm_merge` - Merge two XPM files diagonally
+| Command | Description |
+|---------|-------------|
+| `xpm_show` | Visualize XPM matrices with 4 plotting engines |
+| `xpm2csv` | Convert XPM to CSV format (x, y, value) |
+| `xpm2dat` | Convert XPM to M×N matrix format |
+| `xpm_diff` | Calculate difference between two XPM files |
+| `xpm_merge` | Merge two XPM files diagonally |
 
 ### NDX Files (Index Groups)
 
-- `ndx_add` - Add new index groups to NDX file
-- `ndx_split` - Split one index group into multiple groups
-- `ndx_show` - Display all index group names
-- `ndx_rm_dup` - Remove duplicate index groups
+| Command | Description |
+|---------|-------------|
+| `ndx_add` | Add new index groups to NDX file |
+| `ndx_split` | Split one index group into multiple groups |
+| `ndx_show` | Display all index group names |
 
 ### Other Utilities
 
-- `mdp_gen` - Generate GROMACS MDP file templates
-- `show_style` - Display/generate plotting style configuration files
-- `find_center` - Find geometric center of atom groups
-- `dccm_ascii` - Convert ASCII covariance matrix to DCCM XPM
-- `dssp` - Convert GROMACS 2023 DSSP format to XPM/XVG
+| Command | Description |
+|---------|-------------|
+| `mdp_gen` | Generate GROMACS MDP file templates |
+| `show_style` | Display/generate plotting style configuration files |
+| `find_center` | Find geometric center of atom groups |
+| `dccm_ascii` | Convert ASCII covariance matrix to DCCM XPM |
+| `dssp` | Convert GROMACS 2023 DSSP format to XPM/XVG |
 
 ## Key Concepts
 

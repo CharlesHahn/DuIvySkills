@@ -11,7 +11,7 @@ This skill provides comprehensive workflows for analyzing protein molecular dyna
 
 - GROMACS simulation completed with trajectory files (.xtc/.trr) and topology file (.tpr)
 - Basic understanding of GROMACS commands
-- For visualization: DuIvyTools skill (call `duivytools-helper` when needed)
+- For visualization: DuIvyTools skill (call `duivytools-skills` when needed)
 
 ## Analysis Types
 
@@ -39,7 +39,7 @@ Analyze correlated motions between atomic pairs to identify coordinated movement
 
 **Output**: Covariance matrix (covar.dat), DCCM matrix (dccm.xpm), visualization (dccm.png)
 
-**Visualization**: Use `duivytools-helper` skill to generate heatmaps
+**Visualization**: Use `duivytools-skills` skill to generate heatmaps
 
 **Detailed workflow**: See [DCCM Analysis Guide](references/dccm-analysis.md)
 
@@ -53,7 +53,7 @@ Calculate average distances between residue pairs to analyze inter-residue conta
 
 **Output**: Distance contact matrix (rdcm.xpm), visualization (rdcm.png)
 
-**Visualization**: Use `duivytools-helper` skill to generate heatmaps
+**Visualization**: Use `duivytools-skills` skill to generate heatmaps
 
 **Detailed workflow**: See [RDCM Analysis Guide](references/rdcm-analysis.md)
 
@@ -69,7 +69,7 @@ Identify collective motions and dominant conformational changes by decomposing p
 
 **Key metrics**: First few PCs' contribution percentages
 
-**Visualization**: Use `duivytools-helper` skill to plot eigenvalues and projections
+**Visualization**: Use `duivytools-skills` skill to plot eigenvalues and projections
 
 **Detailed workflow**: See [PCA Analysis Guide](references/pca-analysis.md)
 
@@ -87,7 +87,7 @@ Map free energy surfaces to understand conformational states and transitions usi
 
 **Output**: Free energy landscape (gibbs.xpm), energy minima (gibbs.log), frame indices (bindex.ndx), visualization (fel.png)
 
-**Visualization**: Use `duivytools-helper` skill to generate 2D/3D FEL plots
+**Visualization**: Use `duivytools-skills` skill to generate 2D/3D FEL plots
 
 **Detailed workflow**: See [FEL Analysis Guide](references/fel-analysis.md)
 
@@ -142,9 +142,9 @@ Typical analysis sequence:
 - Ensure index groups match analysis requirements
 - Document index group compositions
 
-## When to Call DuIvyTools-Helper
+## When to Call DuIvyTools-Skills
 
-Call the `duivytools-helper` skill for visualization tasks:
+Call the `duivytools-skills` skill for visualization tasks:
 
 - **XVG files**: Plot RMSD, RMSF, energies, hydrogen bonds, gyrate
 - **XPM files**: Visualize DCCM, RDCM, FEL matrices

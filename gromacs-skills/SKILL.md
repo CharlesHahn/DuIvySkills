@@ -287,7 +287,7 @@ trjconv (PBC correction) → rms/rmsf/gyrate/hbond → visualization with DuIvyT
 trjconv (fit) → covar → anaeig → visualization with DuIvyTools
 ```
 
-**Note**: Use `duivytools-helper` skill for visualizing all GROMACS output files (.xvg, .xpm)
+**Note**: Use `duivytools-skills` skill for visualizing all GROMACS output files (.xvg, .xpm)
 
 ## File Formats
 
@@ -314,7 +314,7 @@ trjconv (fit) → covar → anaeig → visualization with DuIvyTools
 
 **For visualization of GROMACS output files (.xvg, .xpm, etc.), use DuIvyTools:**
 
-Call the `duivytools-helper` skill when you need to:
+Call the `duivytools-skills` skill when you need to:
 - **Visualize .xvg files**: Plot RMSD, RMSF, energies, hydrogen bonds, distances, angles, PC projections, etc.
 - **Visualize .xpm files**: Display matrices, heatmaps (DCCM, distance contact maps, free energy landscapes, secondary structure)
 - **Analyze data**: Calculate averages, distributions, correlations from XVG files

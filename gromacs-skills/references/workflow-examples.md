@@ -325,7 +325,7 @@ dit xvg_show -f temperature.xvg -x "Time (ps)" -y "Temperature (K)" -t "Temperat
 dit xvg_compare -f rmsd.xvg rg.xvg -c 1 1 -l "RMSD" "Rg" -x "Time (ns)"
 ```
 
-**Note**: Use the `duivytools-helper` skill for comprehensive visualization options and advanced plotting features.
+**Note**: Use the `duivytools-skills` skill for comprehensive visualization options and advanced plotting features.
 
 ## Workflow 4: PCA Analysis
 
@@ -390,7 +390,7 @@ dit xvg_show_scatter -f pc1.xvg pc2.xvg -c 1 1 -x "PC1" -y "PC2" -t "PC1 vs PC2"
 dit xvg_show -f 2dproj.xvg -x "Time (ps)" -y "PC1" -y2 "PC2" -t "2D Projection"
 ```
 
-**Note**: Use the `duivytools-helper` skill for comprehensive visualization options and advanced plotting features.
+**Note**: Use the `duivytools-skills` skill for comprehensive visualization options and advanced plotting features.
 
 ## Workflow 5: Free Energy Landscape
 
@@ -777,7 +777,7 @@ dit xpm_show -f fel.xpm -m 3d -eg plotly
 dit xpm_diff -f matrix1.xpm matrix2.xpm -o diff.xpm
 ```
 
-**Call the `duivytools-helper` skill** for comprehensive visualization options and advanced plotting features.
+**Call the `duivytools-skills` skill** for comprehensive visualization options and advanced plotting features.
 
 ## Troubleshooting
 
