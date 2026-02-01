@@ -139,9 +139,9 @@ dit ndx_add -h
 
 ### Plotting Engines
 
-- **matplotlib** (default): Most comprehensive, supports all modes and parameters
-- **plotly**: Interactive plots, good for 3D and contour plots
-- **gnuplot**: High-performance, requires gnuplot installation, generates scripts
+- **matplotlib** (default): Most comprehensive, supports all modes and parameters. Default choice when no specific engine is requested by users.
+- **plotly**: Interactive plots suitable for web server integration and interactive dashboards.
+- **gnuplot**: Requires gnuplot installation, generates scripts for external rendering.
 - **plotext**: Terminal-based, for simple quick plots
 
 ### XPM Visualization Modes
@@ -235,17 +235,51 @@ dit mdp_gen -o nvt.mdp
 
 ### Custom Plotting Styles
 
-Create `dit_mplstyle.mplstyle` in working directory:
+DuIvyTools supports custom plotting styles for all four plotting engines. Use the `show_style` command to generate style configuration files:
 
-```python
-axes.labelsize: 12
-lines.linewidth: 2
-figure.dpi: 100
-savefig.dpi: 300
-image.cmap: coolwarm
+```bash
+# Generate default matplotlib style file (dit_mplstyle.mplstyle)
+dit show_style
+
+# Generate plotly style file
+dit show_style -eg plotly
+
+# Generate gnuplot style file
+dit show_style -eg gnuplot
+
+# Save to custom filename
+dit show_style -eg plotly -o DIT_plotly.json
 ```
 
-DIT automatically loads this file.
+**How it works**:
+1. Run `dit show_style` to generate the default style file in your working directory
+2. Modify the generated style file according to your preferences
+3. DIT automatically loads the style file from the working directory when executing commands
+
+**Matplotlib example** (`dit_mplstyle.mplstyle`):
+
+```dit_mplstyle.mplstyle
+## Matplotlib style for DuIvyTools
+axes.labelsize: 12
+axes.linewidth: 1
+xtick.labelsize: 12
+ytick.labelsize: 12
+lines.linewidth: 2
+legend.fontsize: 12
+legend.loc: best
+font.family: Arial
+font.size: 12
+image.cmap: coolwarm
+figure.dpi: 100
+savefig.dpi: 300
+```
+
+For detailed matplotlib customization, see: https://matplotlib.org/stable/tutorials/introductory/customizing.html
+
+**Other engines**:
+- **plotly**: JSON-based configuration (DIT_plotly.json)
+- **gnuplot**: Script-based configuration (DIT_gnuplot.plt)
+- **plotext**: Minimal terminal-based styling
 
 ### Batch Processing
 
