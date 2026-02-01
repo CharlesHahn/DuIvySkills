@@ -16,6 +16,11 @@ DuIvyTools is a command-line tool for analyzing and visualizing GROMACS molecula
 ### Installation
 
 ```bash
+pip install DuIvyTools
+```
+
+Or use Tsinghua mirror (faster in China):
+```bash
 pip install DuIvyTools -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 
@@ -96,6 +101,26 @@ dit ndx_add -h
 
 ## Key Concepts
 
+### Units and Data Conversion
+
+**⚠️ CRITICAL: Always verify data units before visualization**
+
+- **GROMACS default units**: Time = picoseconds (ps), Distance = nanometers (nm), Energy = kJ/mol
+- **XVG/XPM files may use different units**: Always check the file header comments to verify the actual units
+- **DO NOT convert units by default**: Preserve the original units unless the user explicitly requests conversion
+- **Unit conversion parameters**: `-xs`, `-ys`, `-zs` (multiply) and `-xp`, `-yp`, `-zp` (add offset)
+- **Conversion safety**: When converting units, ALWAYS update the corresponding axis labels to match
+- **Common mistakes to avoid**:
+  - Using `-xs 0.001` to convert ps→ns but keeping xlabel as "Time (ps)"
+  - Applying time conversion to non-time data (e.g., residue numbers, PC values)
+  - Converting energy values without proper understanding of the conversion factor
+
+**Recommended workflow**:
+1. Read the XVG/XPM file header to identify units
+2. Visualize data with original units first
+3. Only apply unit conversion when explicitly requested by user
+4. When converting, ensure both data AND labels are updated consistently
+
 ### Column and Row Indexing
 
 - **Columns**: 0-based indexing (0 = first column)
@@ -129,6 +154,12 @@ dit ndx_add -h
 - `-xs`, `-ys`, `-zs` - Multiply data by factor (default 1.0)
 - `-xp`, `-yp`, `-zp` - Add offset (default 0.0)
 
+**⚠️ WARNING**: Use transformation parameters carefully. Always verify that:
+1. The transformation is appropriate for the data type (e.g., time, energy, distance)
+2. The axis labels are updated to reflect the transformation
+3. The transformation factor is correct for the unit conversion
+4. The transformation does not distort scientific interpretation
+
 **Plotting**:
 - `-eg {matplotlib,plotly,gnuplot,plotext}` - Plotting engine (default: matplotlib)
 - `-cmap COLORMAP` - Color map (matplotlib/plotly)
@@ -159,10 +190,10 @@ dit ndx_add -h
 # Simple display
 dit xvg_show -f rmsd.xvg
 
-# With labels
-dit xvg_show -f rmsd.xvg -x "Time (ns)" -y "RMSD (nm)" -t "RMSD Analysis"
+# With labels (preserving original units)
+dit xvg_show -f rmsd.xvg -x "Time (ps)" -y "RMSD (nm)" -t "RMSD Analysis"
 
-# Convert ps to ns
+# Convert ps to ns (ONLY when explicitly requested)
 dit xvg_show -f rmsd.xvg -xs 0.001 -x "Time (ns)"
 ```
 
@@ -171,7 +202,7 @@ dit xvg_show -f rmsd.xvg -xs 0.001 -x "Time (ns)"
 ```bash
 # Compare two files, different columns
 dit xvg_compare -f rmsd.xvg gyrate.xvg -c 1 1,2 \
-  -l RMSD Gyrate Gyrate_X -x "Time (ns)"
+  -l RMSD Gyrate Gyrate_X -x "Time (ps)"
 
 # With moving average
 dit xvg_compare -f energy.xvg -c 1,3 -l "LJ(SR)" "Coulomb(SR)" -smv

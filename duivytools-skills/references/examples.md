@@ -1,5 +1,35 @@
 # DuIvyTools 使用示例
 
+## ⚠️ 重要提示：单位和数据转换
+
+**GROMACS 默认单位**：时间 (ps), 距离, 能量 (kJ/mol)
+
+**本文件中的示例说明**：
+- 本文件中包含的单位转换示例（如 `-xs 0.001` 将 ps 转换为 ns）仅作为**技术演示**
+- 在实际使用中，**默认应保持原始单位**，除非用户明确要求转换
+- 进行单位转换时，**必须同时更新轴标签**以确保数据和标签一致
+- 请参考主 SKILL.md 文件中的 "Units and Data Conversion" 部分了解详细的最佳实践
+
+## ⚠️ 重要提示：XPM 数据类型和科学意义
+
+**XPM 文件类型**：
+- **Discrete 类型**（离散）：如 DSSP 二级结构矩阵，每个像素代表离散的状态（α-helix, β-sheet, coil 等）
+- **Continuous 类型**（连续）：如 DCCM（动态互相关矩阵）、FEL（自由能景观），每个像素代表连续的数值
+
+**适用的操作**：
+- **xpm_diff（计算差值）**：仅适用于 Continuous 类型的 XPM
+  - ✅ 可以：DCCM、FEL、相关性矩阵等
+  - ❌ 不可以：DSSP、contact map 等离散类型
+- **xpm_merge（合并）**：适用于所有类型，但要求两个 XPM 具有相同的尺寸和轴标签
+- **xpm_show（可视化）**：适用于所有类型，但不同类型的可视化方式可能不同
+
+**科学意义检查**：
+- 所有示例都经过科学意义验证，确保分析方法的正确性
+- 在进行比较分析时，确保比较的对象具有可比性和科学意义
+- 对于离散类型数据，使用统计方法（如含量分析、频率分析）而非差值计算
+
+---
+
 ## 目录
 
 - [分子动力学结果分析](#分子动力学结果分析)
@@ -23,7 +53,7 @@
 
 **解决方案**：
 ```bash
-# 显示所有 RMSD 文件
+# 显示所有 RMSD 文件（单位转换示例 - 仅作技术演示）
 dit xvg_compare -f md1_rep1_rmsd.xvg md1_rep2_rmsd.xvg md1_rep3_rmsd.xvg \
   md2_rep1_rmsd.xvg md2_rep2_rmsd.xvg md2_rep3_rmsd.xvg \
   md3_rep1_rmsd.xvg md3_rep2_rmsd.xvg md3_rep3_rmsd.xvg \
@@ -32,11 +62,11 @@ dit xvg_compare -f md1_rep1_rmsd.xvg md1_rep2_rmsd.xvg md1_rep3_rmsd.xvg \
   -x "Time (ns)" -y "RMSD (nm)" -t "RMSD Comparison" \
   -xs 0.001 -smv
 
-# 保存为图片
+# 保存为图片（单位转换示例 - 仅作技术演示）
 dit xvg_compare -f md1_rep1_rmsd.xvg md2_rep1_rmsd.xvg md3_rep1_rmsd.xvg \
   -c 1 1 1 \
   -l "MD1" "MD2" "MD3" \
-  -x "Time (ns)" -y "RMSD (nm)" \
+  -xs 0.001 -x "Time (ns)" -y "RMSD (nm)" \
   -ns -o rmsd_comparison.png
 ```
 
@@ -48,19 +78,19 @@ dit xvg_compare -f md1_rep1_rmsd.xvg md2_rep1_rmsd.xvg md3_rep1_rmsd.xvg \
 
 **解决方案**：
 ```bash
-# 显示所有回转半径分量
+# 显示所有回转半径分量（单位转换示例 - 仅作技术演示）
 dit xvg_compare -f gyrate.xvg -c 1,2,3,4 \
   -l Rg RgX RgY RgZ \
   -x "Time (ns)" -y "Rg (nm)" -t "Radius of Gyration" \
   -xs 0.001
 
-# 使用小提琴图比较分布
+# 使用小提琴图比较分布（单位转换示例 - 仅作技术演示）
 dit xvg_box_compare -f gyrate.xvg -c 1,2,3,4 \
   -l Rg RgX RgY RgZ \
   -z "Time(ns)" -zs 0.001 \
   -t "Gyrate Distribution"
 
-# 仅显示小提琴图
+# 仅显示小提琴图（单位转换示例 - 仅作技术演示）
 dit xvg_box_compare -f gyrate.xvg -c 1,2,3,4 \
   -l Rg RgX RgY RgZ \
   -z "Time(ns)" -zs 0.001 \
@@ -143,7 +173,7 @@ dit xvg_ave_bar \
 
 **解决方案**：
 ```bash
-# 显示氢键数量变化
+# 显示氢键数量变化（单位转换示例 - 仅作技术演示）
 dit xvg_show -f hbonds.xvg \
   -x "Time (ns)" -y "Number of H-bonds" \
   -t "Protein-Ligand Hydrogen Bonds" \
@@ -165,15 +195,15 @@ dit xvg_show_distribution -f hbonds.xvg -c 1 \
 
 **解决方案**：
 ```bash
-# 比较氢键数量
+# 比较氢键数量（单位转换示例 - 仅作技术演示）
 dit xvg_compare -f wt_hbonds.xvg mutant_hbonds.xvg \
   -c 1 1 \
   -l "Wild-Type" "Mutant" \
   -x "Time (ns)" -y "Number of H-bonds" \
   -t "Hydrogen Bond Comparison" \
-  -xs 0.001 -smv
+  -xs 0.001
 
-# 使用小提琴图比较分布
+# 使用小提琴图比较分布（单位转换示例 - 仅作技术演示）
 dit xvg_box_compare -f wt_hbonds.xvg mutant_hbonds.xvg \
   -c 1 1 \
   -l "Wild-Type" "Mutant" \
@@ -198,7 +228,6 @@ dit dssp -f dssp.dat -o dssp.xpm
 dit xpm_show -f dssp.xpm \
   -x "Residue Index" -y "Time (ps)" \
   -t "Secondary Structure" \
-  -xs 0.001
 
 # 切割显示特定区域（残基 50-150，时间 1000-2000 ps）
 dit xpm_show -f dssp.xpm \
@@ -206,7 +235,7 @@ dit xpm_show -f dssp.xpm \
   -x "Residue Index" -y "Time (ps)" \
   -t "Secondary Structure (Residues 50-150)"
 
-# 使用 plotly 交互式查看
+# 使用 plotly 交互式查看（单位转换示例 - 仅作技术演示）
 dit xpm_show -f dssp.xpm \
   -eg plotly -xs 0.001 \
   -x "Residue Index" -y "Time (ns)"
@@ -220,41 +249,51 @@ dit xpm_show -f dssp.xpm \
 
 **解决方案**：
 ```bash
-# 显示二级结构含量堆积图
+# 显示二级结构含量堆积图（单位转换示例 - 仅作技术演示）
 dit xvg_show_stack -f dssp_sc.xvg -c 2-7 \
-  -x "Time (ns)" -y "Content (%)" \
+  -x "Time (ns)" -y "Amino Acids Count" \
   -t "Secondary Structure Content" \
   -xs 0.001
-
-# 设置颜色和图例
-dit xvg_show_stack -f dssp_sc.xvg -c 2-7 \
-  -l "Alpha-Helix" "3-10-Helix" "Pi-Helix" "Beta-Sheet" "Beta-Bridge" "Coil" \
-  -x "Time (ns)" -y "Content (%)" \
-  -t "Secondary Structure Content" \
-  -xs 0.001 -cmap viridis
 ```
 
 ---
 
-### 场景10：比较不同状态的二级结构
+### 场景10：比较不同状态的动态互相关矩阵（DCCM）
 
-**问题描述**：比较蛋白质在结合配体前后的二级结构变化。
+**问题描述**：比较蛋白质在结合配体前后原子运动相关性的变化，分析配体结合对蛋白质动态性质的影响。
+
+**科学意义**：DCCM（Dynamics Cross-Correlation Matrix）是连续型数据矩阵，可以计算差值。通过比较apo状态和holo状态的DCCM，可以识别配体结合后蛋白质内部运动模式的改变，这对于理解配体结合的分子机制具有重要意义。
 
 **解决方案**：
+
+**方法1：计算差值矩阵**
 ```bash
-# 计算二级结构差值
-dit xpm_diff -f apo_dssp.xpm holo_dssp.xpm -o dssp_diff.xpm
+# 计算DCCM差值（Holo - Apo）
+dit xpm_diff -f apo_dccm.xpm holo_dccm.xpm -o dccm_diff.xpm
 
 # 显示差值矩阵
-dit xpm_show -f dssp_diff.xpm \
-  -x "Residue Index" -y "Time (ps)" \
-  -t "Secondary Structure Difference (Holo - Apo)" \
-  -cmap coolwarm -zmin -1 -zmax 1
+dit xpm_show -f dccm_diff.xpm \
+  -x "Residue Index" -y "Residue Index" \
+  -t "DCCM Difference (Holo - Apo)" \
+  -cmap coolwarm -zmin -2 -zmax 2
 
-# 保存差值矩阵
-dit xpm_diff -f apo_dssp.xpm holo_dssp.xpm -o dssp_diff.xpm
-dit xpm_show -f dssp_diff.xpm -ns -o dssp_diff.png
+# 保存差值矩阵图片
+dit xpm_show -f dccm_diff.xpm -ns -o dccm_diff.png
 ```
+
+**方法2：合并显示两个矩阵**
+```bash
+# 合并显示（左上 Apo，右下 Holo）
+dit xpm_merge -f apo_dccm.xpm holo_dccm.xpm -o dccm_merged.xpm
+dit xpm_show -f dccm_merged.xpm \
+  -x "Residue Index" -y "Residue Index" \
+  -t "DCCM (Top-Left: Apo, Bottom-Right: Holo)"
+```
+
+**结果解读**（针对差值矩阵）：
+- 正值（红色）：配体结合增强了这两个残基之间的正相关运动
+- 负值（蓝色）：配体结合改变了运动方向，使原本正相关变为负相关
+- 接近0：配体结合对这对残基的相关性影响较小
 
 ---
 
@@ -272,7 +311,7 @@ dit xvg_compare -f rmsd_backbone.xvg rmsd_heavy.xvg \
   -l "Backbone" "Heavy Atoms" \
   -x "Time (ns)" -y "RMSD (nm)" \
   -t "RMSD Comparison" \
-  -xs 0.001 -smv
+  -xs 0.001
 
 # 使用滑动平均和置信区间
 dit xvg_compare -f rmsd_backbone.xvg rmsd_heavy.xvg \
@@ -294,12 +333,6 @@ dit xvg_compare -f rmsd_backbone.xvg rmsd_heavy.xvg \
 dit xvg_show -f rmsf.xvg \
   -x "Residue Index" -y "RMSF (nm)" \
   -t "Root Mean Square Fluctuation"
-
-# 标记柔性区域（RMSF > 0.2 nm）
-dit xvg_show -f rmsf.xvg \
-  -x "Residue Index" -y "RMSF (nm)" \
-  -t "Root Mean Square Fluctuation" \
-  -ymin 0 -ymax 0.5
 
 # 比较不同状态的 RMSF
 dit xvg_compare -f apo_rmsf.xvg holo_rmsf.xvg \
@@ -341,36 +374,11 @@ dit xpm_show -f dccm.xpm -ns -o dccm.png
 
 ---
 
-### 场景14：比较不同状态的 DCCM
-
-**问题描述**：比较蛋白质在结合配体前后的动态相关性变化。
-
-**解决方案**：
-```bash
-# 计算差值
-dit xpm_diff -f apo_dccm.xpm holo_dccm.xpm -o dccm_diff.xpm
-
-# 显示差值矩阵
-dit xpm_show -f dccm_diff.xpm \
-  -x "Residue Index" -y "Residue Index" \
-  -z "Correlation Difference" \
-  -t "DCCM Difference (Holo - Apo)" \
-  -cmap coolwarm -zmin -0.5 -zmax 0.5
-
-# 合并显示（左上 Apo，右下 Holo）
-dit xpm_merge -f apo_dccm.xpm holo_dccm.xpm -o dccm_merged.xpm
-dit xpm_show -f dccm_merged.xpm \
-  -x "Residue Index" -y "Residue Index" \
-  -t "DCCM (Top-Left: Apo, Bottom-Right: Holo)"
-```
-
----
-
 ## 自由能景观 (FEL)
 
-### 场景15：2D 自由能景观
+### 场景14：2D 自由能景观
 
-**问题描述**：使用两个反应坐标（如 PC1, PC2）构建二维自由能景观。
+**问题描述**：可视化二维自由能景观。
 
 **解决方案**：
 ```bash
@@ -401,7 +409,7 @@ dit xpm_show -f fel.xpm \
 
 ---
 
-### 场景16：3D 自由能景观
+### 场景15：3D 自由能景观
 
 **问题描述**：使用三个反应坐标构建三维自由能景观。
 
@@ -425,7 +433,7 @@ dit xpm_show -f fel.xpm \
 
 ## Ramachandran 图
 
-### 场景17：分析蛋白质主链二面角
+### 场景16：分析蛋白质主链二面角
 
 **问题描述**：分析蛋白质的 phi 和 psi 二面角分布，识别二级结构区域。
 
@@ -447,9 +455,9 @@ dit xvg_rama -f rama_ala.xvg
 
 ## 蛋白质几何性质
 
-### 场景18：计算配体结合口袋的几何中心
+### 场景17：计算几何中心
 
-**问题描述**：计算配体或残基的几何中心，用于分析结合位点。
+**问题描述**：计算配体或残基的几何中心。
 
 **解决方案**：
 ```bash
@@ -465,7 +473,7 @@ dit find_center -f protein.gro
 
 ---
 
-### 场景19：分析残基间距离
+### 场景18：分析残基间距离
 
 **问题描述**：分析两个残基之间的距离随时间的变化。
 
@@ -488,7 +496,7 @@ dit xvg_show_distribution -f distance.xvg -c 1 \
 
 ## 批量处理和脚本生成
 
-### 场景20：批量生成所有分析的图片
+### 场景19：批量生成所有分析的图片
 
 **问题描述**：对多个模拟结果批量生成分析图片。
 
@@ -532,7 +540,7 @@ done
 
 ---
 
-### 场景21：使用 gnuplot 生成高质量图片
+### 场景20：使用 gnuplot 生成高质量图片
 
 **问题描述**：使用 gnuplot 引擎生成高质量、可定制的图片。
 
@@ -550,7 +558,7 @@ dit xpm_show -f fel.xpm -m 3d -eg gnuplot -ns -o fel_3d.png
 
 ---
 
-### 场景22：自定义绘图样式
+### 场景21：自定义绘图样式
 
 **问题描述**：自定义 matplotlib 绘图样式以满足特定要求。
 
@@ -599,7 +607,7 @@ dit xvg_show -f rmsd.xvg
 
 **解决方案**：
 ```bash
-# 组合 RMSD、Rg 和能量
+# 组合 RMSD、Rg 和能量（单位转换示例 - 仅作技术演示）
 dit xvg_compare -f rmsd.xvg gyrate.xvg energy.xvg \
   -c 1 1 1 \
   -l RMSD Rg Energy \
@@ -607,7 +615,7 @@ dit xvg_compare -f rmsd.xvg gyrate.xvg energy.xvg \
   -t "Multiple Properties" \
   -xs 0.001
 
-# 使用散点图显示相关性
+# 使用散点图显示相关性（单位转换示例 - 仅作技术演示）
 dit xvg_show_scatter -f rmsd.xvg -c 0,1 \
   -x "Time (ns)" -y "RMSD (nm)" -t "RMSD vs Time"
 ```
@@ -678,8 +686,9 @@ dit xpm_show -f fel.xpm -cmap viridis
 **解决方案**：
 ```bash
 # 使用 matplotlib 引擎，调整分辨率
+# 编辑 dit_mplstyle.mplstyle，设置 savefig.dpi: 600
+# 然后
 dit xvg_show -f rmsd.xvg -ns -o rmsd_publication.png
-# 然后编辑 dit_mplstyle.mplstyle，设置 savefig.dpi: 600
 
 # 使用 gnuplot 生成矢量图
 dit xvg_show -f rmsd.xvg -eg gnuplot -ns -o rmsd.eps
@@ -725,26 +734,36 @@ dit xvg_show -f rmsd.xvg --legend_location inside
 
 ### Q4: 如何处理时间单位？
 
-**A**: 使用 `-xs` 参数缩放时间轴。
+**A**: ⚠️ **重要**：默认情况下应保持原始单位（通常是 ps），仅在用户明确要求时才转换。如果需要转换，使用 `-xs` 参数缩放时间轴并更新轴标签。
 
 ```bash
-# 将 ps 转换为 ns（乘以 0.001）
+# 保持原始单位（推荐）
+dit xvg_show -f rmsd.xvg -x "Time (ps)"
+
+# 用户明确要求转换为 ns 时使用
 dit xvg_show -f rmsd.xvg -xs 0.001 -x "Time (ns)"
 
-# 将 ns 转换为 μs（乘以 0.001）
+# 用户明确要求转换为 μs 时使用
 dit xvg_show -f rmsd.xvg -xs 0.001 -x "Time (μs)"
 ```
+
+**警告**：单位转换时必须同时更新轴标签，否则会误导数据解释。
 
 ---
 
 ### Q5: 如何处理能量单位？
 
-**A**: 使用 `-ys` 参数缩放能量轴。
+**A**: ⚠️ **重要**：默认情况下应保持原始单位（通常是 kJ/mol），仅在用户明确要求时才转换。如果需要转换，使用 `-ys` 参数缩放能量轴并更新轴标签。
 
 ```bash
-# 将 kJ/mol 转换为 kcal/mol（乘以 0.239）
+# 保持原始单位（推荐）
+dit xvg_show -f energy.xvg -c 1 -y "Energy (kJ/mol)"
+
+# 用户明确要求转换为 kcal/mol 时使用（乘以 0.239）
 dit xvg_show -f energy.xvg -c 1 -ys 0.239 -y "Energy (kcal/mol)"
 ```
+
+**警告**：能量单位转换必须使用正确的转换因子，并更新轴标签。
 
 ---
 

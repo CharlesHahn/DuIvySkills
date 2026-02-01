@@ -52,6 +52,12 @@
 
 ### 数据变换参数
 
+**⚠️ 警告**：使用数据变换参数时请务必谨慎：
+- 确保变换适用于数据类型（时间、能量、距离等）
+- 变换后必须更新对应的轴标签
+- 确保变换因子正确，不会误导科学解释
+- 默认情况下应保持原始单位，仅在用户明确要求时才转换
+
 - `-xs XSHRINK, --xshrink XSHRINK`：X 轴数据缩放因子，默认1.0
 - `-ys YSHRINK, --yshrink YSHRINK`：Y 轴数据缩放因子，默认1.0
 - `-zs ZSHRINK, --zshrink ZSHRINK`：Z 轴数据缩放因子，默认1.0
@@ -171,8 +177,8 @@ dit xvg_show -f rmsd.xvg -c 1 -x "Time (ns)" -y "RMSD (nm)" -t "RMSD Analysis"
 # 比较两个文件的不同列
 dit xvg_compare -f rmsd.xvg gyrate.xvg -c 1 1,2
 
-# 设置图例和轴标签
-dit xvg_compare -f rmsd.xvg gyrate.xvg -c 1 1,2 -l RMSD gyrate gyrate_X -x "Time(ns)" -y "(nm)" -t hhh
+# 设置图例和轴标签（注意：使用原始单位 ps）
+dit xvg_compare -f rmsd.xvg gyrate.xvg -c 1 1,2 -l RMSD gyrate gyrate_X -x "Time(ps)" -y "(nm)" -t hhh
 
 # 显示滑动平均值
 dit xvg_compare -f energy.xvg -c 1,3 -l "LJ(SR)" "Coulomb(SR)" -smv
@@ -180,10 +186,10 @@ dit xvg_compare -f energy.xvg -c 1,3 -l "LJ(SR)" "Coulomb(SR)" -smv
 # 导出数据到 CSV
 dit xvg_compare -f energy.xvg -c 1,3 -l "LJ(SR)" "Coulomb(SR)" -ns -csv data.csv
 
-# 使用 plotly 引擎
+# 使用 plotly 引擎（单位转换示例 - 仅作技术演示）
 dit xvg_compare -f energy.xvg -c 1,3 -l "LJ(SR)" "Coulomb(SR)" -xs 0.001 -x "Time(ns)" -smv -eg plotly
 
-# 使用 gnuplot 引擎
+# 使用 gnuplot 引擎（单位转换示例 - 仅作技术演示）
 dit xvg_compare -f energy.xvg -c 1,3 -l "LJ(SR)" "Coulomb(SR)" -xs 0.001 -x "Time(ns)" -smv -eg gnuplot
 ```
 
@@ -265,7 +271,7 @@ dit xvg_show_distribution -f gyrate.xvg -c 1,2 -m cdf -eg gnuplot
 
 **示例**：
 ```bash
-# 绘制二级结构含量堆积图
+# 绘制二级结构含量堆积图（单位转换示例 - 仅作技术演示）
 dit xvg_show_stack -f dssp_sc.xvg -c 2-7 -xs 0.001 -x "Time (ns)"
 ```
 
@@ -289,7 +295,7 @@ dit xvg_show_stack -f dssp_sc.xvg -c 2-7 -xs 0.001 -x "Time (ns)"
 # 两列散点图
 dit xvg_show_scatter -f gyrate.xvg -c 1,2
 
-# 三列散点图（用时间着色）
+# 三列散点图（用时间着色 - 单位转换示例，仅作技术演示）
 dit xvg_show_scatter -f gyrate.xvg -c 1,2,0 -zs 0.001 -z "Time(ns)" -eg plotly --x_precision 2 --y_precision 2
 ```
 
@@ -314,16 +320,16 @@ dit xvg_show_scatter -f gyrate.xvg -c 1,2,0 -zs 0.001 -z "Time(ns)" -eg plotly -
 
 **示例**：
 ```bash
-# 显示小提琴图和散点图
+# 显示小提琴图和散点图（单位转换示例 - 仅作技术演示）
 dit xvg_box_compare -f gyrate.xvg -c 1,2,3,4 -l Gyrate Gx Gy Gz -z "Time(ns)" -zs 0.001
 
-# 仅显示小提琴图
+# 仅显示小提琴图（单位转换示例 - 仅作技术演示）
 dit xvg_box_compare -f gyrate.xvg -c 1,2,3,4 -l Gyrate Gx Gy Gz -z "Time(ns)" -zs 0.001 -m withoutScatter
 
-# 使用 plotly 引擎
+# 使用 plotly 引擎（单位转换示例 - 仅作技术演示）
 dit xvg_box_compare -f gyrate.xvg -c 1,2,3,4 -l Gyrate Gx Gy Gz -z "Time(ns)" -zs 0.001 -eg plotly
 
-# 使用 gnuplot 引擎并设置 Y 轴范围
+# 使用 gnuplot 引擎并设置 Y 轴范围（单位转换示例 - 仅作技术演示）
 dit xvg_box_compare -f gyrate.xvg -c 1,2,3,4 -l Gyrate Gx Gy Gz -z "Time(ns)" -zs 0.001 -eg gnuplot -ymin 2
 ```
 
