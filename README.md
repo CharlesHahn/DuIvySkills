@@ -36,7 +36,6 @@ skills:
   - path: /path/to/DuIvySkills/gromacs-protein-analysis
 ```
 
-
 ### 验证安装
 
 安装完成后，在 Claude Code 或 iFlow CLI 中测试：
@@ -138,6 +137,150 @@ DuIvySkills/
 - GROMACS 文档: https://manual.gromacs.org/
 
 ## 许可证
+
+GNU General Public License v3
+
+---
+
+# DuIvySkills
+
+An iFlow CLI skill collection for GROMACS molecular dynamics simulations, compatible with **Claude Code** and **iFlow CLI**.
+
+## Installing Skills
+
+### Method 1: Copy to Skills Directory
+
+Copy the skill directories from this repository to the Claude Code or iFlow CLI skills directory:
+
+```bash
+# Clone repository
+git clone https://github.com/CharlesHahn/DuIvySkills.git
+cd DuIvySkills
+
+# Copy skills to specified directory (adjust according to your installation location)
+# Claude Code skills directory example:
+cp -r duivytools-skills ~/.claude-code/skills/
+cp -r gromacs-skills ~/.claude-code/skills/
+cp -r gromacs-protein-analysis ~/.claude-code/skills/
+
+# Or iFlow CLI skills directory example:
+cp -r duivytools-skills ~/.iflow/skills/
+cp -r gromacs-skills ~/.iflow/skills/
+cp -r gromacs-protein-analysis ~/.iflow/skills/
+```
+
+### Method 2: Specify via Configuration File
+
+Add skill paths to the configuration file of Claude Code or iFlow CLI:
+
+```yaml
+skills:
+  - path: /path/to/DuIvySkills/duivytools-skills
+  - path: /path/to/DuIvySkills/gromacs-skills
+  - path: /path/to/DuIvySkills/gromacs-protein-analysis
+```
+
+### Verify Installation
+
+After installation, test in Claude Code or iFlow CLI:
+
+```
+"Help me use DuIvyTools to plot rmsd.xvg file"
+```
+
+If the system can recognize and invoke the relevant skills, the installation is successful.
+
+## Project Overview
+
+DuIvySkills provides three core skill packages covering the complete workflow of GROMACS molecular dynamics simulations:
+
+- **duivytools-skills** - Visualization tool for GROMACS simulation results
+- **gromacs-skills** - Command reference and workflow guide for GROMACS software
+- **gromacs-protein-analysis** - Specialized workflow for protein dynamics analysis
+
+## Usage
+
+### Install DuIvyTools
+
+```bash
+pip install DuIvyTools
+```
+
+Or use Tsinghua mirror (faster):
+
+```bash
+pip install DuIvyTools -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+### Using in iFlow CLI
+
+When you need to perform GROMACS-related tasks, iFlow CLI will automatically invoke the corresponding skills:
+
+1. **Execute GROMACS commands**: Invoke `gromacs-skills`
+2. **Analyze protein simulation results**: Invoke `gromacs-protein-analysis`
+3. **Visualize data**: Invoke `duivytools-skills`
+
+### Examples
+
+```bash
+# Set up and run GROMACS simulation
+iFlow "帮我设置一个蛋白质的 GROMACS 模拟"
+
+# Analyze protein dynamics
+iFlow "分析我的蛋白质 MD 模拟结果，包括 RMSD、PCA 和自由能景观"
+
+# Visualize results
+iFlow "绘制我的 RMSD 和 DCCM 图"
+```
+
+## Skill Package Details
+
+### duivytools-skills
+
+Provides approximately 30 commands for processing GROMACS output files such as XVG, XPM, NDX:
+
+- Visualize RMSD, RMSF, energy, hydrogen bonds and other data
+- Plot DCCM, FEL, DSSP matrix heatmaps
+- Manipulate NDX index files
+- Statistical analysis and batch processing
+
+### gromacs-skills
+
+Complete GROMACS command reference, covering:
+
+- Topology and structure processing
+- Simulation setup and execution
+- Energy and trajectory analysis
+- Index and atom selection
+
+### gromacs-protein-analysis
+
+Five core workflows for protein analysis:
+
+1. PBC correction
+2. DCCM analysis (Dynamics Cross-Correlation Matrix)
+3. RDCM analysis (Residue Distance Contact Matrix)
+4. PCA analysis (Principal Component Analysis)
+5. FEL analysis (Free Energy Landscape)
+
+## Documentation Structure
+
+```
+DuIvySkills/
+├── duivytools-skills/          # DuIvyTools skill package
+├── gromacs-skills/            # GROMACS skill package
+├── gromacs-protein-analysis/  # Protein analysis skill package
+├── AGENTS.md                  # Project context
+└── README.md                  # This file
+```
+
+## Related Links
+
+- GitHub: https://github.com/CharlesHahn/DuIvySkills
+- DuIvyTools: https://github.com/CharlesHahn/DuIvyTools
+- GROMACS documentation: https://manual.gromacs.org/
+
+## License
 
 GNU General Public License v3
 
