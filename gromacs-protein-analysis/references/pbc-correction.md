@@ -2,14 +2,15 @@
 
 ## Overview
 
-Periodic boundary condition (PBC) correction removes artifacts from molecules crossing simulation box boundaries. This correction is essential before downstream analysis to prevent issues like abrupt RMSD jumps and ensure proper visualization.
+Periodic boundary condition (PBC) correction removes artifacts from molecules crossing simulation box boundaries. This correction may be necessary when trajectory quality issues are observed (e.g., abrupt RMSD jumps). Many analyses work fine without PBC correction.
 
 ## When to Apply PBC Correction
 
 - Molecules (protein or ligand) cross box boundaries
 - RMSD/RMSF plots show abrupt jumps or discontinuities
 - Visualization shows fragmented molecules
-- Before any analysis requiring aligned structures
+
+Note: PBC correction is optional. Only apply when you observe the above issues. Analysis problems may have other causes beyond PBC artifacts.
 
 ## Prerequisites
 
@@ -141,16 +142,18 @@ Use PyMOL or VMD to inspect the PDB file. Check that:
 - **Document atom selections**: Keep track of which atoms are in each index group
 - **Consistent group selection**: Use the same groups for all related analyses
 - **Visual inspection**: Always visually inspect corrected trajectory before downstream analysis
-- **Backup original files**: Always keep original trajectory files before modifications
+- **Never overwrite existing files**: Use unique output filenames to preserve original data
 
 ## Related Analyses
 
-PBC-corrected trajectories are required for:
+PBC correction may benefit analyses where RMSD shows abrupt jumps:
 - RMSD/RMSF analysis
 - DCCM analysis
 - PCA analysis
 - FEL analysis
 - Any structural analysis requiring aligned trajectories
+
+Note: PBC correction is optional and not always necessary. Apply only when trajectory quality issues are observed.
 
 ## Alternative Approaches
 

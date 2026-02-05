@@ -15,10 +15,9 @@ Residue Distance Contact Matrix (RDCM) calculates average distances between resi
 
 ## Prerequisites
 
-- Trajectory file (.xtc)
+- Trajectory file (.xtc/.trr) - PBC correction optional
 - Topology file (.tpr)
-- Index file (.ndx) with protein group
-- PBC-corrected trajectory (recommended)
+- Index file (.ndx) with appropriate atom groups
 
 ## Workflow
 

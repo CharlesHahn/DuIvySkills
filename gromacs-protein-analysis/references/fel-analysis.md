@@ -45,13 +45,13 @@ Use PC projections as reaction coordinates.
 ## Prerequisites
 
 ### For Method 1 (RMSD + Gyrate)
-- PBC-corrected trajectory
+- Trajectory file (.xtc/.trr) - PBC correction optional
 - RMSD data (rmsd.xvg)
 - Gyrate data (gyrate.xvg)
 - Topology file (.tpr)
 
 ### For Method 2 (PCA)
-- PBC-corrected trajectory
+- Trajectory file (.xtc/.trr) - PBC correction optional
 - PCA eigenvectors (eigenvectors.trr)
 - PC projections (pc1.xvg, pc2.xvg)
 - Topology file (.tpr)

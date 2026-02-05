@@ -15,7 +15,7 @@ Principal Component Analysis (PCA) identifies collective motions and dominant co
 
 ## Prerequisites
 
-- PBC-corrected trajectory (see [PBC Correction Guide](pbc-correction.md))
+- Trajectory file (.xtc/.trr) - PBC correction optional (see [PBC Correction Guide](pbc-correction.md) if needed)
 - Topology file (.tpr)
 - Index file (.ndx) with appropriate atom groups
 - Trajectory should be fitted to remove overall translation/rotation
