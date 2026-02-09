@@ -1,308 +1,308 @@
-# Root Mean Square Deviation (RMSD) Analysis
+# 均方根偏差（RMSD）分析
 
-## Overview
+## 概述
 
-Root Mean Square Deviation (RMSD) measures the average distance between atoms in a protein structure relative to a reference structure. RMSD is the most common metric for assessing structural stability, identifying equilibration phases, and evaluating simulation convergence.
+均方根偏差（RMSD）测量蛋白质结构中的原子相对于参考结构的平均距离。RMSD 是评估结构稳定性、识别平衡阶段和评估模拟收敛性的最常用指标。
 
-## When to Use RMSD
+## 何时使用 RMSD
 
-- Assess overall structural stability during simulation
-- Identify equilibration phase (when RMSD stabilizes)
-- Evaluate simulation convergence
-- Compare different simulation conditions or mutants
-- Monitor protein unfolding or large conformational changes
-- Validate simulation against experimental structures
+- 评估模拟期间的整体结构稳定性
+- 识别平衡阶段（当 RMSD 稳定时）
+- 评估模拟收敛性
+- 比较不同的模拟条件或突变体
+- 监测蛋白质展开或大的构象变化
+- 根据实验结构验证模拟
 
-## Prerequisites
+## 前提条件
 
-- Trajectory file (.xtc/.trr) - PBC correction optional (see [PBC Correction Guide](pbc-correction.md) if RMSD shows abrupt jumps)
-- Topology file (.tpr)
-- Reference structure (usually the first frame or a known structure)
-- Index file (.ndx) with appropriate atom groups
+- 轨迹文件（.xtc/.trr）- PBC 修正是可选的（如果 RMSD 显示突然跳跃，请参阅 [PBC 修正指南](pbc-correction.md)）
+- 拓扑文件（.tpr）
+- 参考结构（通常是第一帧或已知结构）
+- 包含适当原子组的索引文件（.ndx）
 
-## Workflow
+## 工作流程
 
-### Step 1: Fit Trajectory to Remove Overall Motion
+### 步骤 1：拟合轨迹以消除整体运动
 
-Fit trajectory to remove overall translation and rotation:
+拟合轨迹以消除整体平移和旋转：
 
 ```bash
 echo -e "Protein\nProtein\n" | gmx trjconv -s md.tpr -f md.xtc -o fit.xtc -pbc nojump -fit rot+trans
 ```
 
-- First input: Select group for centering (Protein)
-- Second input: Select group for fitting (Protein)
+- 第一个输入：选择用于居中的组（Protein）
+- 第二个输入：选择用于拟合的组（Protein）
 
-**Output file**:
-- `fit.xtc`: Fitted trajectory with overall motion removed
+**输出文件**：
+- `fit.xtc`：已消除整体运动的拟合轨迹
 
-### Step 2: Calculate RMSD
+### 步骤 2：计算 RMSD
 
-Calculate RMSD using the fitted trajectory:
+使用拟合轨迹计算 RMSD：
 
 ```bash
-# RMSD for protein backbone
+# 蛋白质主链的 RMSD
 echo -e "Backbone\nBackbone\n" | gmx rms -s md.tpr -f fit.xtc -o rmsd_backbone.xvg -tu ns
 
-# RMSD for C-alpha atoms
+# C-alpha 原子的 RMSD
 echo -e "C-alpha\nC-alpha\n" | gmx rms -s md.tpr -f fit.xtc -o rmsd_calpha.xvg -tu ns
 
-# RMSD for all protein atoms
+# 所有蛋白质原子的 RMSD
 echo -e "Protein\nProtein\n" | gmx rms -s md.tpr -f fit.xtc -o rmsd_protein.xvg -tu ns
 ```
 
-**Parameters**:
-- `-s md.tpr`: Structure file for reference (uses first frame by default)
-- `-f fit.xtc`: Fitted trajectory file
-- `-o rmsd_*.xvg`: Output file for RMSD data
-- `-tu ns`: Time unit in nanoseconds
+**参数**：
+- `-s md.tpr`：参考结构文件（默认使用第一帧）
+- `-f fit.xtc`：拟合轨迹文件
+- `-o rmsd_*.xvg`：RMSD 数据的输出文件
+- `-tu ns`：时间单位为纳秒
 
-**Output files**:
-- `rmsd_backbone.xvg`: RMSD for backbone atoms
-- `rmsd_calpha.xvg`: RMSD for C-alpha atoms
-- `rmsd_protein.xvg`: RMSD for all protein atoms
+**输出文件**：
+- `rmsd_backbone.xvg`：主链原子的 RMSD
+- `rmsd_calpha.xvg`：C-alpha 原子的 RMSD
+- `rmsd_protein.xvg`：所有蛋白质原子的 RMSD
 
-### Step 3: Use Custom Reference Structure (Optional)
+### 步骤 3：使用自定义参考结构（可选）
 
-Calculate RMSD relative to a specific reference structure:
+相对于特定参考结构计算 RMSD：
 
 ```bash
 echo -e "Backbone\nBackbone\n" | gmx rms -s reference.pdb -f fit.xtc -o rmsd_to_ref.xvg -tu ns
 ```
 
-- `-s reference.pdb`: Use custom reference structure instead of first frame
+- `-s reference.pdb`：使用自定义参考结构而不是第一帧
 
-### Step 4: Calculate RMSD for Specific Domains (Optional)
+### 步骤 4：计算特定结构域的 RMSD（可选）
 
-Calculate RMSD for protein domains or subunits:
+计算蛋白质结构域或亚基的 RMSD：
 
 ```bash
-# Create index file with domain groups
+# 创建包含结构域组的索引文件
 echo -e "r 1-100\nname 10 Domain1\nr 101-200\nname 11 Domain2\nq\n" | gmx make_ndx -f md.tpr -o domains.ndx
 
-# Calculate RMSD for Domain1
+# 计算 Domain1 的 RMSD
 echo -e "Domain1\nDomain1\n" | gmx rms -s md.tpr -f fit.xtc -n domains.ndx -o rmsd_domain1.xvg
 ```
 
-### Step 5: Visualize RMSD
+### 步骤 5：可视化 RMSD
 
-Generate RMSD plots over time:
+生成 RMSD 随时间变化的图：
 
 ```bash
-# Basic RMSD plot
+# 基本 RMSD 图
 dit xvg_show -f rmsd_backbone.xvg -x "Time (ns)" -y "RMSD (nm)" -t "Backbone RMSD"
 
-# RMSD with smoothed line
+# 带平滑线的 RMSD 图
 dit xvg_show -f rmsd_backbone.xvg -x "Time (ns)" -y "RMSD (nm)" -t "Backbone RMSD" -m line --smooth
 
-# Compare multiple RMSD curves
+# 比较多个 RMSD 曲线
 dit xvg_show -f rmsd_backbone.xvg rmsd_calpha.xvg rmsd_protein.xvg -x "Time (ns)" -y "RMSD (nm)" -t "RMSD Comparison"
 ```
 
-## Output Files
+## 输出文件
 
-- **rmsd_backbone.xvg**: Backbone RMSD over time
-- **rmsd_calpha.xvg**: C-alpha RMSD over time
-- **rmsd_protein.xvg**: Full protein RMSD over time
-- **rmsd_to_ref.xvg**: RMSD relative to custom reference
-- **rmsd_domain*.xvg**: Domain-specific RMSD
+- **rmsd_backbone.xvg**：主链 RMSD 随时间的变化
+- **rmsd_calpha.xvg**：C-alpha RMSD 随时间的变化
+- **rmsd_protein.xvg**：完整蛋白质 RMSD 随时间的变化
+- **rmsd_to_ref.xvg**：相对于自定义参考的 RMSD
+- **rmsd_domain*.xvg**：特定结构域的 RMSD
 
-## Interpretation Guidelines
+## 解释指南
 
-### RMSD Values
+### RMSD 值
 
-Typical RMSD ranges for stable protein simulations:
+稳定蛋白质模拟的典型 RMSD 范围：
 
-- **< 0.1 nm (1 Å)**: Very stable, minimal conformational change
-- **0.1-0.2 nm (1-2 Å)**: Good stability, typical for well-folded proteins
-- **0.2-0.3 nm (2-3 Å)**: Moderate flexibility, acceptable for many proteins
-- **0.3-0.5 nm (3-5 Å)**: Significant flexibility or large conformational change
-- **> 0.5 nm (5 Å)**: Large structural change, possible unfolding or rearrangement
+- **< 0.1 nm (1 Å)**：非常稳定，构象变化最小
+- **0.1-0.2 nm (1-2 Å)**：良好的稳定性，典型于折叠良好的蛋白质
+- **0.2-0.3 nm (2-3 Å)**：中等灵活性，对许多蛋白质可接受
+- **0.3-0.5 nm (3-5 Å)**：显著的灵活性或大的构象变化
+- **> 0.5 nm (5 Å)**：大的结构变化，可能的展开或重排
 
-### RMSD Pattern Analysis
+### RMSD 模式分析
 
-- **Equilibration phase**: RMSD increases rapidly in first few ns, then stabilizes
-- **Stable phase**: RMSD fluctuates around a constant value
-- **Convergence**: RMSD reaches plateau and shows stable fluctuations
-- **Drift**: Continuous increase in RMSD indicates poor convergence
-- **Jumps**: Sudden RMSD jumps may indicate PBC artifacts or conformational changes
+- **平衡阶段**：RMSD 在最初几纳秒内迅速增加，然后稳定
+- **稳定阶段**：RMSD 围绕常数波动
+- **收敛**：RMSD 达到平稳期并显示稳定的波动
+- **漂移**：RMSD 的连续增加表明收敛不良
+- **跳跃**：突然的 RMSD 跳跃可能表示 PBC 伪影或构象变化
 
-### Atom Selection Impact
+### 原子选择的影响
 
-- **Backbone**: Reflects overall protein stability, commonly used
-- **C-alpha**: Similar to backbone, computationally efficient
-- **All atoms**: More sensitive to side chain motions, larger values
-- **Heavy atoms**: Excludes hydrogens, reduces noise
+- **主链**：反映整体蛋白质稳定性，常用
+- **C-alpha**：类似于主链，计算效率高
+- **所有原子**：对侧链运动更敏感，值更大
+- **重原子**：排除氢，减少噪声
 
-### Equilibration Assessment
+### 平衡评估
 
-Determine equilibration time from RMSD:
+从 RMSD 确定平衡时间：
 
-1. Plot RMSD over time
-2. Identify when RMSD reaches plateau
-3. Use statistical tests (e.g., block averaging) to confirm convergence
-4. Exclude equilibration phase from production analysis
+1. 绘制 RMSD 随时间的变化
+2. 识别 RMSD 达到平稳期的时间
+3. 使用统计检验（例如，块平均）确认收敛
+4. 从生产分析中排除平衡阶段
 
-## Common Issues and Solutions
+## 常见问题和解决方案
 
-### Issue: RMSD shows abrupt jumps
+### 问题：RMSD 显示突然跳跃
 
-**Possible causes**:
-- PBC artifacts (molecules crossing box boundaries)
-- Protein centering issues
-- Numerical instabilities
+**可能原因**：
+- PBC 伪影（分子跨越盒边界）
+- 蛋白质居中问题
+- 数值不稳定性
 
-**Solutions**:
-- Apply PBC correction: `gmx trjconv -pbc mol -center`
-- Use `-pbc nojump` flag in `trjconv`
-- Fit trajectory before RMSD calculation
+**解决方案**：
+- 应用 PBC 修正：`gmx trjconv -pbc mol -center`
+- 在 `trjconv` 中使用 `-pbc nojump` 标志
+- 在 RMSD 计算之前拟合轨迹
 
-### Issue: RMSD continuously increases without plateau
+### 问题：RMSD 持续增加而没有平稳期
 
-**Possible causes**:
-- Simulation not converged
-- Protein unfolding
-- Inadequate force field parameters
+**可能原因**：
+- 模拟未收敛
+- 蛋白质展开
+- 力场参数不充分
 
-**Solutions**:
-- Extend simulation time
-- Check protein structure for unfolding
-- Verify force field compatibility
+**解决方案**：
+- 延长模拟时间
+- 检查蛋白质结构是否有展开
+- 验证力场兼容性
 
-### Issue: RMSD values are unexpectedly high
+### 问题：RMSD 值异常高
 
-**Possible causes**:
-- Wrong reference structure
-- Incorrect atom selection
-- Large conformational change
+**可能原因**：
+- 参考结构错误
+- 原子选择不正确
+- 大的构象变化
 
-**Solutions**:
-- Verify reference structure matches simulation system
-- Check atom selection groups
-- Examine trajectory for large-scale motions
+**解决方案**：
+- 验证参考结构与模拟系统匹配
+- 检查原子选择组
+- 检查轨迹是否有大规模运动
 
-### Issue: RMSD shows very low values (< 0.05 nm)
+### 问题：RMSD 显示非常低的值（< 0.05 nm）
 
-**Possible causes**:
-- Reference structure is from same trajectory (first frame)
-- Protein is very rigid
-- Fitting removes too much motion
+**可能原因**：
+- 参考结构来自同一轨迹（第一帧）
+- 蛋白质非常刚性
+- 拟合消除了太多运动
 
-**Solutions**:
-- Use different reference structure (e.g., crystal structure)
-- Check if RMSD reflects real structural changes
-- Consider alternative metrics (e.g., RMSF)
+**解决方案**：
+- 使用不同的参考结构（例如，晶体结构）
+- 检查 RMSD 是否反映真实的结构变化
+- 考虑替代指标（例如，RMSF）
 
-## Tips and Best Practices
+## 提示和最佳实践
 
-- **Atom selection**: Backbone RMSD is standard for overall stability. Use C-alpha for efficiency.
-- **Reference structure**: Use first frame for self-convergence, use crystal structure for validation.
-- **Trajectory fitting**: Always fit trajectory before RMSD to remove overall motion.
-- **Time selection**: Plot full trajectory to identify equilibration phase. Use production phase for analysis.
-- **Multiple selections**: Calculate RMSD for different atom groups to understand different aspects of stability.
-- **Statistical analysis**: Calculate average RMSD, standard deviation, and confidence intervals for production phase.
-- **Visual inspection**: Combine RMSD analysis with trajectory visualization to interpret large deviations.
+- **原子选择**：主链 RMSD 是整体稳定性的标准。为提高效率使用 C-alpha。
+- **参考结构**：使用第一帧进行自收敛，使用晶体结构进行验证。
+- **轨迹拟合**：在 RMSD 之前始终拟合轨迹以消除整体运动。
+- **时间选择**：绘制完整轨迹以识别平衡阶段。使用生产阶段进行分析。
+- **多个选择**：为不同原子组计算 RMSD 以了解稳定性的不同方面。
+- **统计分析**：计算生产阶段的平均 RMSD、标准差和置信区间。
+- **目视检查**：结合 RMSD 分析和轨迹可视化以解释大的偏差。
 
-## Advanced Analysis
+## 高级分析
 
-### Time-averaged RMSD
+### 时间平均 RMSD
 
-Calculate rolling average RMSD to identify trends:
-
-```bash
-# Use custom script or tools to calculate moving average
-# Example: 100 ps window moving average
-```
-
-### RMSD Distribution
-
-Analyze RMSD distribution to understand sampling:
+计算滚动平均 RMSD 以识别趋势：
 
 ```bash
-# Extract RMSD values
-# Calculate histogram
-# Fit to distribution model (e.g., Gaussian)
+# 使用自定义脚本或工具计算移动平均
+# 示例：100 ps 窗口的移动平均
 ```
 
-### RMSD Difference Between Simulations
+### RMSD 分布
 
-Compare RMSD between different simulations:
+分析 RMSD 分布以了解采样：
 
 ```bash
-# Calculate RMSD for each simulation
-# Plot side-by-side for comparison
-# Use statistical tests (t-test, KS test) to assess significance
+# 提取 RMSD 值
+# 计算直方图
+# 拟合到分布模型（例如，高斯）
 ```
 
-### Per-residue RMSD
+### 不同模拟之间的 RMSD 差异
 
-Calculate RMSD contribution per residue (similar to RMSF):
+比较不同模拟之间的 RMSD：
 
 ```bash
-# This is typically done using RMSF analysis
-# See RMSF Analysis Guide for details
+# 计算每个模拟的 RMSD
+# 并排绘制进行比较
+# 使用统计检验（t 检验、KS 检验）评估显著性
 ```
 
-## Related Analyses
+### 每个残基的 RMSD
 
-- **RMSF**: Provides per-residue flexibility, complements RMSD
-- **Gyrate**: Assesses protein compactness and unfolding
-- **PCA**: Identifies collective motions beyond overall RMSD
-- **SASA**: Monitors solvent accessibility and surface changes
-- **PBC Correction**: Required if RMSD shows jumps due to PBC artifacts
+计算每个残基的 RMSD 贡献（类似于 RMSF）：
 
-## Visualization Enhancements
+```bash
+# 这通常使用 RMSF 分析完成
+# 有关详细信息，请参阅 RMSF 分析指南
+```
 
-### Add Equilibration Line
+## 相关分析
 
-Mark equilibration phase on RMSD plot:
+- **RMSF**：提供每个残基的灵活性，补充 RMSD
+- **Gyrate**：评估蛋白质紧致性和展开
+- **PCA**：识别整体 RMSD 之外的集体运动
+- **SASA**：监测溶剂可及性和表面变化
+- **PBC 修正**：如果 RMSD 由于 PBC 伪影显示跳跃，则需要
+
+## 可视化增强
+
+### 添加平衡线
+
+在 RMSD 图上标记平衡阶段：
 
 ```bash
 dit xvg_show -f rmsd_backbone.xvg -x "Time (ns)" -y "RMSD (nm)" -t "Backbone RMSD" --vline 5 --vlabel "Equilibration"
 ```
 
-### Multiple Comparison Plots
+### 多个比较图
 
-Compare RMSD from multiple simulations:
+比较来自多个模拟的 RMSD：
 
 ```bash
 dit xvg_show -f rmsd_sim1.xvg rmsd_sim2.xvg rmsd_sim3.xvg -x "Time (ns)" -y "RMSD (nm)" -t "RMSD Comparison"
 ```
 
-### RMSD vs Temperature
+### RMSD 与温度的关系
 
-Monitor RMSD at different simulation conditions:
+监测不同模拟条件下的 RMSD：
 
 ```bash
-# Plot RMSD for simulations at different temperatures
-# Analyze temperature dependence of stability
+# 绘制不同温度下模拟的 RMSD
+# 分析稳定性的温度依赖性
 ```
 
-## Interpretation Examples
+## 解释示例
 
-### Example 1: Well-Equilibrated Simulation
+### 示例 1：平衡良好的模拟
 
-- RMSD increases from 0 to 0.15 nm in first 2 ns
-- Stabilizes at ~0.15 nm for remaining 98 ns
-- Small fluctuations (~0.02 nm) around mean
-- **Interpretation**: Simulation equilibrated after 2 ns, good stability
+- RMSD 在前 2 ns 内从 0 增加到 0.15 nm
+- 在剩余的 98 ns 内稳定在 ~0.15 nm
+- 围绕平均值的小波动（~0.02 nm）
+- **解释**：模拟在 2 ns 后平衡，稳定性良好
 
-### Example 2: Unfolding Protein
+### 示例 2：展开的蛋白质
 
-- RMSD increases gradually throughout simulation
-- Reaches > 0.8 nm by end of simulation
-- No clear plateau
-- **Interpretation**: Protein is unfolding, may need longer simulation or different conditions
+- RMSD 在整个模拟过程中逐渐增加
+- 在模拟结束时达到 > 0.8 nm
+- 没有明显的平稳期
+- **解释**：蛋白质正在展开，可能需要更长的模拟或不同的条件
 
-### Example 3: Conformational Change
+### 示例 3：构象变化
 
-- RMSD stable at 0.2 nm for first 50 ns
-- Sudden jump to 0.4 nm at 50 ns
-- Stable at new level for remaining 50 ns
-- **Interpretation**: Protein undergoes conformational transition, both states stable
+- RMSD 在前 50 ns 内稳定在 0.2 nm
+- 在 50 ns 时突然跳跃到 0.4 nm
+- 在剩余的 50 ns 内稳定在新水平
+- **解释**：蛋白质经历构象转变，两种状态都稳定
 
-## References
+## 参考文献
 
-For theoretical background, see:
-- Marti-Renom et al. (2002) "Comparative protein structure modeling of genes and genomes"
-- Kuhlman and Baker (2000) "Native protein sequences are close to optimal for their structures"
+有关理论背景，请参阅：
+- Marti-Renom 等人（2002）"Comparative protein structure modeling of genes and genomes"
+- Kuhlman 和 Baker（2000）"Native protein sequences are close to optimal for their structures"

@@ -1,160 +1,160 @@
-# Free Energy Landscape (FEL) Analysis
+# 自由能景观（FEL）分析
 
-## Overview
+## 概述
 
-Free Energy Landscape (FEL) maps the energy surface of protein conformations, identifying stable states, energy barriers, and transition pathways. Two common approaches use either RMSD + Gyrate or Principal Components (PCs) as reaction coordinates.
+自由能景观（FEL）绘制蛋白质构象的能量表面，识别稳定状态、能垒和转变途径。两种常用方法使用 RMSD + Gyrate 或主成分（PC）作为反应坐标。
 
-## When to Use FEL
+## 何时使用 FEL
 
-- Identify stable conformational states
-- Quantify energy barriers between states
-- Understand conformational transitions
-- Analyze protein folding/unfolding
-- Study domain movements and allostery
-- Compare free energy surfaces between conditions
+- 识别稳定的构象状态
+- 量化状态之间的能垒
+- 理解构象转变
+- 分析蛋白质折叠/展开
+- 研究结构域运动和变构
+- 比较不同条件之间的自由能表面
 
-## Two Approaches
+## 两种方法
 
-### Method 1: RMSD + Gyrate
+### 方法 1：RMSD + Gyrate
 
-Use structural deviation and compactness as reaction coordinates.
+使用结构偏差和紧致性作为反应坐标。
 
-**Advantages**:
-- Intuitive interpretation
-- Directly relates to structural changes
-- Easy to calculate
+**优点**：
+- 直观的解释
+- 直接与结构变化相关
+- 易于计算
 
-**Disadvantages**:
-- May not capture subtle conformational changes
-- Sensitive to reference structure selection
+**缺点**：
+- 可能无法捕获细微的构象变化
+- 对参考结构选择敏感
 
-### Method 2: Principal Components
+### 方法 2：主成分
 
-Use PC projections as reaction coordinates.
+使用 PC 投影作为反应坐标。
 
-**Advantages**:
-- Captures collective motions
-- Based on natural coordinates from dynamics
-- Reveals dominant conformational changes
+**优点**：
+- 捕获集体运动
+- 基于动力学的自然坐标
+- 揭示主要的构象变化
 
-**Disadvantages**:
-- Requires prior PCA analysis
-- Less intuitive interpretation
-- May miss non-dominant but important motions
+**缺点**：
+- 需要先进行 PCA 分析
+- 解释不够直观
+- 可能遗漏非主导但重要的运动
 
-## Prerequisites
+## 前提条件
 
-### For Method 1 (RMSD + Gyrate)
-- Trajectory file (.xtc/.trr) - PBC correction optional
-- RMSD data (rmsd.xvg)
-- Gyrate data (gyrate.xvg)
-- Topology file (.tpr)
+### 对于方法 1（RMSD + Gyrate）
+- 轨迹文件（.xtc/.trr）- PBC 修正是可选的
+- RMSD 数据（rmsd.xvg）
+- Gyrate 数据（gyrate.xvg）
+- 拓扑文件（.tpr）
 
-### For Method 2 (PCA)
-- Trajectory file (.xtc/.trr) - PBC correction optional
-- PCA eigenvectors (eigenvectors.trr)
-- PC projections (pc1.xvg, pc2.xvg)
-- Topology file (.tpr)
+### 对于方法 2（PCA）
+- 轨迹文件（.xtc/.trr）- PBC 修正是可选的
+- PCA 特征向量（eigenvectors.trr）
+- PC 投影（pc1.xvg、pc2.xvg）
+- 拓扑文件（.tpr）
 
-## Workflow: Method 1 (RMSD + Gyrate)
+## 工作流程：方法 1（RMSD + Gyrate）
 
-### Step 1: Calculate RMSD
+### 步骤 1：计算 RMSD
 
-Calculate RMSD relative to reference structure:
+计算相对于参考结构的 RMSD：
 
 ```bash
 echo -e "Backbone\nProtein\n" | gmx rms -s md.tpr -f md.xtc -o rmsd.xvg
 ```
 
-- First input: Select reference for alignment (Backbone)
-- Second input: Select group for RMSD calculation (Protein)
+- 第一个输入：选择用于对齐的参考（Backbone）
+- 第二个输入：选择用于 RMSD 计算的组（Protein）
 
-**Output**: `rmsd.xvg` (time, RMSD)
+**输出**：`rmsd.xvg`（时间、RMSD）
 
-### Step 2: Calculate Gyrate
+### 步骤 2：计算 Gyrate
 
-Calculate radius of gyration:
+计算回转半径：
 
 ```bash
 echo -e "Protein\n" | gmx gyrate -s md.tpr -f md.xtc -o gyrate.xvg
 ```
 
-- Input: Select Protein group
+- 输入：选择蛋白质组
 
-**Output**: `gyrate.xvg` (time, Rg, Rg_x, Rg_y, Rg_z)
-- Column 1: Time
-- Column 2: Total Rg
-- Columns 3-5: X, Y, Z components
+**输出**：`gyrate.xvg`（时间、Rg、Rg_x、Rg_y、Rg_z）
+- 第 1 列：时间
+- 第 2 列：总 Rg
+- 第 3-5 列：X、Y、Z 分量
 
-### Step 3: Combine RMSD and Gyrate Data
+### 步骤 3：组合 RMSD 和 Gyrate 数据
 
-Combine RMSD and total Rg into single file for sham analysis:
+将 RMSD 和总 Rg 组合成单个文件以进行 sham 分析：
 
 ```bash
 dit xvg_combine -f rmsd.xvg gyrate.xvg -c 0,1 1 -o sham.xvg
 ```
 
-**Parameters**:
-- `-c 0,1 1`: Extract columns (time, RMSD) from first file and column 1 (Rg) from second file
-- Creates `sham.xvg` with columns: time, RMSD, Rg
+**参数**：
+- `-c 0,1 1`：从第一个文件提取列（时间、RMSD），从第二个文件提取列 1（Rg）
+- 创建 `sham.xvg`，包含列：时间、RMSD、Rg
 
-### Step 4: Generate Free Energy Landscape
+### 步骤 4：生成自由能景观
 
-Use gmx sham to calculate FEL:
+使用 gmx sham 计算 FEL：
 
 ```bash
 gmx sham -tsham 310 -nlevels 100 -f sham.xvg -ls gibbs.xpm -g gibbs.log -lsh enthalpy.xpm -lss entropy.xpm
 ```
 
-**Parameters**:
-- `-tsham 310`: Temperature in Kelvin
-- `-nlevels 100`: Number of energy levels (resolution)
-- `-f sham.xvg`: Input file with reaction coordinates
-- `-ls gibbs.xpm`: Output Gibbs free energy landscape
-- `-g gibbs.log`: Log file with energy minima
-- `-lsh enthalpy.xpm`: Enthalpy landscape
-- `-lss entropy.xpm`: Entropy landscape
+**参数**：
+- `-tsham 310`：开尔文温度
+- `-nlevels 100`：能级数量（分辨率）
+- `-f sham.xvg`：包含反应坐标的输入文件
+- `-ls gibbs.xpm`：输出吉布斯自由能景观
+- `-g gibbs.log`：包含能量极小值的日志文件
+- `-lsh enthalpy.xpm`：焓景观
+- `-lss entropy.xpm`：熵景观
 
-**Output files**:
-- `gibbs.xpm`: Gibbs free energy landscape (XPM format)
-- `gibbs.log`: Log file with energy minima and indices
-- `enthalpy.xpm`: Enthalpy landscape
-- `entropy.xpm`: Entropy landscape
-- `bindex.ndx`: Index file with frame assignments
-- `ener.xvg`: Energy values
+**输出文件**：
+- `gibbs.xpm`：吉布斯自由能景观（XPM 格式）
+- `gibbs.log`：包含能量极小值和索引的日志文件
+- `enthalpy.xpm`：焓景观
+- `entropy.xpm`：熵景观
+- `bindex.ndx`：带有帧分配的索引文件
+- `ener.xvg`：能量值
 
-### Step 5: Visualize FEL
+### 步骤 5：可视化 FEL
 
-Generate visualization of free energy landscape:
+生成自由能景观的可视化：
 
 ```bash
 dit xpm_show -f gibbs.xpm -m contour -cmap jet -o fel.png
 ```
 
-**Parameters**:
-- `-m contour`: Contour plot mode
-- `-cmap jet`: Jet colormap (blue=low energy, red=high energy)
-- Set axis labels: `-x "RMSD (nm)" -y "Rg (nm)"`
+**参数**：
+- `-m contour`：等高线图模式
+- `-cmap jet`：Jet 颜色图（蓝色=低能量，红色=高能量）
+- 设置轴标签：`-x "RMSD (nm)" -y "Rg (nm)"`
 
-### Step 6: Extract Lowest Energy Conformations
+### 步骤 6：提取最低能量构象
 
-Identify and extract structures corresponding to energy minima:
+识别并提取对应于能量极小值的结构：
 
 ```bash
-# View energy minima
+# 查看能量极小值
 cat gibbs.log
 
-# Example output:
+# 示例输出：
 # Minimum 0 at index 26 energy 7.589
 # Minimum 1 at index 46 energy 7.589
 # Minimum 2 at index 50 energy 7.589
 # Minimum 3 at index 56 energy 7.589
 # Minimum 4 at index 141 energy 5.803
 
-# Check frames corresponding to minima
+# 检查对应于极小值的帧
 cat bindex.ndx
 
-# Example output:
+# 示例输出：
 # [ 26 ]
 # 1274
 # [ 46 ]
@@ -164,267 +164,267 @@ cat bindex.ndx
 # 1282
 ```
 
-Extract conformation at specific time:
+在特定时间提取构象：
 
 ```bash
-# Extract frame 1274
+# 提取帧 1274
 echo -e "Protein\n" | gmx trjconv -f md.xtc -s md.tpr -b <time_at_frame_1274> -e <time_at_frame_1274> -o min1.pdb
 ```
 
-To find time at specific frame, check sham.xvg:
+要查找特定帧的时间，请检查 sham.xvg：
 
 ```bash
-# Frame number corresponds to line number in sham.xvg
-# Time at frame N = value in column 0 of line N in sham.xvg
+# 帧编号对应于 sham.xvg 中的行号
+# 帧 N 的时间 = sham.xvg 中第 N 行第 0 列的值
 ```
 
-## Workflow: Method 2 (Principal Components)
+## 工作流程：方法 2（主成分）
 
-### Step 1: Perform PCA Analysis
+### 步骤 1：执行 PCA 分析
 
-Complete PCA analysis (see [PCA Analysis Guide](pca-analysis.md)) to obtain:
-- `eigenvectors.trr`: Eigenvectors
-- `pc1.xvg`: Projection onto PC1
-- `pc2.xvg`: Projection onto PC2
+完成 PCA 分析（参见 [PCA 分析指南](pca-analysis.md)）以获得：
+- `eigenvectors.trr`：特征向量
+- `pc1.xvg`：投影到 PC1 上
+- `pc2.xvg`：投影到 PC2 上
 
-### Step 2: Combine PC Projections
+### 步骤 2：组合 PC 投影
 
-Combine PC1 and PC2 projections:
+组合 PC1 和 PC2 投影：
 
 ```bash
 dit xvg_combine -f pc1.xvg pc2.xvg -c 0,1 1 -o sham.xvg
 ```
 
-**Parameters**:
-- `-c 0,1 1`: Extract columns (time, PC1) from first file and column 1 (PC2) from second file
-- Creates `sham.xvg` with columns: time, PC1, PC2
+**参数**：
+- `-c 0,1 1`：从第一个文件提取列（时间、PC1），从第二个文件提取列 1（PC2）
+- 创建 `sham.xvg`，包含列：时间、PC1、PC2
 
-### Step 3: Generate Free Energy Landscape
+### 步骤 3：生成自由能景观
 
-Same as Method 1, Step 4:
+与方法 1 步骤 4 相同：
 
 ```bash
 gmx sham -tsham 310 -nlevels 100 -f sham.xvg -ls gibbs.xpm -g gibbs.log -lsh enthalpy.xpm -lss entropy.xpm
 ```
 
-### Step 4: Visualize FEL
+### 步骤 4：可视化 FEL
 
-Generate visualization:
+生成可视化：
 
 ```bash
 dit xpm_show -f gibbs.xpm -m contour -cmap jet -o fel.png -x "PC1" -y "PC2" -t "Free Energy Landscape"
 ```
 
-### Step 5: Extract Lowest Energy Conformations
+### 步骤 5：提取最低能量构象
 
-Same as Method 1, Steps 5-6.
+与方法 1 步骤 5-6 相同。
 
-## Output Files
+## 输出文件
 
-- **sham.xvg**: Combined reaction coordinate data
-- **gibbs.xpm**: Gibbs free energy landscape (XPM format)
-- **gibbs.log**: Energy minima and indices
-- **enthalpy.xpm**: Enthalpy landscape
-- **entropy.xpm**: Entropy landscape
-- **bindex.ndx**: Frame assignments for energy minima
-- **ener.xvg**: Energy values
-- **fel.png**: Visualization of free energy landscape
-- **min*.pdb**: Structures at energy minima
+- **sham.xvg**：组合的反应坐标数据
+- **gibbs.xpm**：吉布斯自由能景观（XPM 格式）
+- **gibbs.log**：能量极小值和索引
+- **enthalpy.xpm**：焓景观
+- **entropy.xpm**：熵景观
+- **bindex.ndx**：能量极小值的帧分配
+- **ener.xvg**：能量值
+- **fel.png**：自由能景观的可视化
+- **min*.pdb**：能量极小值处的结构
 
-## Interpretation Guidelines
+## 解释指南
 
-### Energy Minima
+### 能量极小值
 
-- **Deep minima**: Stable conformational states
-- **Shallow minima**: Metastable states or transient conformations
-- **Multiple minima**: Existence of multiple stable states
-- **Single minimum**: Single dominant conformation
+- **深极小值**：稳定的构象状态
+- **浅极小值**：亚稳态或瞬时构象
+- **多个极小值**：存在多个稳定状态
+- **单个极小值**：单个主导构象
 
-### Energy Barriers
+### 能垒
 
-- **High barriers**: Slow transitions, rare events
-- **Low barriers**: Rapid transitions, frequent interconversions
-- **Barrier height**: Related to transition rates (k ∝ exp(-ΔG/kT))
+- **高能垒**：缓慢转变，稀有事件
+- **低能垒**：快速转变，频繁互变
+- **能垒高度**：与转变速率相关（k ∝ exp(-ΔG/kT)）
 
-### Landscape Topology
+### 景观拓扑
 
-- **Funnel shape**: Protein folding landscape
-- **Multiple funnels**: Multiple folding pathways
-- **Rugged landscape**: Many local minima, glassy behavior
-- **Smooth landscape**: Few barriers, rapid dynamics
+- **漏斗形状**：蛋白质折叠景观
+- **多个漏斗**：多个折叠途径
+- **粗糙景观**：许多局部极小值，玻璃态行为
+- **平滑景观**：少数能垒，快速动力学
 
-### Reaction Coordinates
+### 反应坐标
 
-**RMSD + Gyrate**:
-- **High RMSD, High Rg**: Unfolded or extended conformations
-- **Low RMSD, Low Rg**: Compact, native-like conformations
-- **Low RMSD, High Rg**: Unfolded but structured
-- **High RMSD, Low Rg**: Misfolded or collapsed structures
+**RMSD + Gyrate**：
+- **高 RMSD、高 Rg**：展开或伸展构象
+- **低 RMSD、低 Rg**：紧密、类天然构象
+- **低 RMSD、高 Rg**：展开但有序
+- **高 RMSD、低 Rg**：错误折叠或塌陷结构
 
-**Principal Components**:
-- **PC1 axis**: Dominant motion
-- **PC2 axis**: Second dominant motion
-- **Regions**: Different conformational states along collective motions
+**主成分**：
+- **PC1 轴**：主导运动
+- **PC2 轴**：第二主导运动
+- **区域**：沿集体运动的不同构象状态
 
-## Common Issues and Solutions
+## 常见问题和解决方案
 
-### Issue: FEL shows unrealistic energy barriers (> 20 kT)
+### 问题：FEL 显示不切实际的能垒（> 20 kT）
 
-**Possible causes**:
-- Insufficient sampling
-- Incorrect time range selection
-- Temperature mismatch
+**可能原因**：
+- 采样不足
+- 时间范围选择不正确
+- 温度不匹配
 
-**Solutions**:
-- Extend simulation time
-- Use consistent time range
-- Verify temperature setting in sham command
+**解决方案**：
+- 延长模拟时间
+- 使用一致的时间范围
+- 验证 sham 命令中的温度设置
 
-### Issue: FEL appears noisy or fragmented
+### 问题：FEL 显示噪声或碎片化
 
-**Solutions**:
-- Increase number of levels (`-nlevels`)
-- Extend simulation time for better sampling
-- Smooth data before analysis
+**解决方案**：
+- 增加能级数量（`-nlevels`）
+- 延长模拟时间以获得更好的采样
+- 在分析之前平滑数据
 
-### Issue: Multiple minima merge into single basin
+### 问题：多个极小值合并为单个盆地
 
-**Solutions**:
-- Increase resolution (more levels)
-- Use different reaction coordinates
-- Check if minima are physically distinct
+**解决方案**：
+- 增加分辨率（更多能级）
+- 使用不同的反应坐标
+- 检查极小值是否在物理上是不同的
 
-### Issue: FEL shows no clear minima
+### 问题：FEL 没有显示清晰的极小值
 
-**Solutions**:
-- Protein may be rigid (single conformation)
-- Check simulation quality
-- Consider using different reaction coordinates
+**解决方案**：
+- 蛋白质可能是刚性的（单个构象）
+- 检查模拟质量
+- 考虑使用不同的反应坐标
 
-## Tips and Best Practices
+## 提示和最佳实践
 
-- **Time selection**: Use production phase only, exclude equilibration
-- **Temperature**: Match simulation temperature in sham command
-- **Resolution**: Adjust `-nlevels` for appropriate detail
-- **Sampling**: Ensure sufficient sampling of conformational space
-- **Comparison**: Compare FELs from different conditions or mutants
-- **Validation**: Relate energy minima to experimental structures
+- **时间选择**：仅使用生产阶段，排除平衡
+- **温度**：在 sham 命令中匹配模拟温度
+- **分辨率**：调整 `-nlevels` 以获得适当的细节
+- **采样**：确保对构象空间的充分采样
+- **比较**：比较来自不同条件或突变体的 FEL
+- **验证**：将能量极小值与实验结构相关联
 
-## Advanced Analysis
+## 高级分析
 
-### Time-dependent FEL
+### 时间依赖性 FEL
 
-Calculate FEL for different time windows:
+为不同时间窗口计算 FEL：
 
 ```bash
-# FEL for first half
+# 前半部分的 FEL
 dit xvg_combine -f rmsd_early.xvg gyrate_early.xvg -c 0,1 1 -o sham_early.xvg
 gmx sham -tsham 310 -nlevels 100 -f sham_early.xvg -ls gibbs_early.xpm
 
-# FEL for second half
+# 后半部分的 FEL
 dit xvg_combine -f rmsd_late.xvg gyrate_late.xvg -c 0,1 1 -o sham_late.xvg
-gmx sham -tsham 310 -nlevels 100 -f sham_late.xvg -ls gibbs_late.xvg
+gmx sham -tsham 310 -nlevels 100 -f sham_late.xvg -ls gibbs_late.xpm
 ```
 
-Compare FELs to identify changes in conformational landscape.
+比较 FEL 以识别构象景观的变化。
 
-### Difference FEL
+### 差异 FEL
 
-Calculate difference between two FELs:
+计算两个 FEL 之间的差异：
 
 ```bash
 dit xpm_diff -f gibbs_early.xpm gibbs_late.xpm -o gibbs_diff.xpm
 ```
 
-Identifies regions where free energy changed significantly.
+识别自由能发生显著变化的区域。
 
-### Pathway Analysis
+### 途径分析
 
-Identify minimum energy paths between states:
+识别状态之间的最小能量路径：
 
 ```bash
-# Use specialized tools (e.g., string method, nudged elastic band)
-# Requires additional processing
+# 使用专用工具（例如，字符串方法、推动弹性带）
+- 需要额外处理
 ```
 
-### Multi-dimensional FEL
+### 多维 FEL
 
-Extend to 3D using additional reaction coordinates:
+使用额外的反应坐标扩展到 3D：
 
 ```bash
-# Combine three coordinates
+# 组合三个坐标
 dit xvg_combine -f pc1.xvg pc2.xvg pc3.xvg -c 0,1 1 1 -o sham_3d.xvg
 gmx sham -tsham 310 -nlevels 100 -f sham_3d.xvg -ls gibbs_3d.xpm
 ```
 
-Visualize 3D FEL using plotly:
+使用 plotly 可视化 3D FEL：
 
 ```bash
 dit xpm_show -f gibbs_3d.xpm -m 3d -eg plotly -o fel_3d.html
 ```
 
-## Related Analyses
+## 相关分析
 
-- **PCA**: Provides collective motions for FEL
-- **DCCM**: Identifies correlated motions in energy minima
-- **RMSF**: Analyzes flexibility at energy minima
-- **Contact Analysis**: Identifies contacts in different states
+- **PCA**：为 FEL 提供集体运动
+- **DCCM**：识别能量极小值中的相关运动
+- **RMSF**：分析能量极小值处的灵活性
+- **接触分析**：识别不同状态中的接触
 
-## Visualization Enhancements
+## 可视化增强
 
-### Custom Color Schemes
+### 自定义颜色方案
 
-Use different colormaps:
+使用不同的颜色图：
 
 ```bash
-# Jet (default)
+# Jet（默认）
 dit xpm_show -f gibbs.xpm -m contour -cmap jet -o fel_jet.png
 
-# Viridis (perceptually uniform)
+# Viridis（感知均匀）
 dit xpm_show -f gibbs.xpm -m contour -cmap viridis -o fel_viridis.png
 
-# Plasma (alternative)
+# Plasma（替代）
 dit xpm_show -f gibbs.xpm -m contour -cmap plasma -o fel_plasma.png
 ```
 
-### 3D Visualization
+### 3D 可视化
 
-Generate 3D surface plot:
+生成 3D 表面图：
 
 ```bash
 dit xpm_show -f gibbs.xpm -m 3d -eg plotly -o fel_3d.html
 ```
 
-### Overlay Conformations
+### 叠加构象
 
-Extract and overlay structures from different minima using PyMOL or VMD.
+使用 PyMOL 或 VMD 从不同极小值提取并叠加结构。
 
-### Energy Profiles
+### 能量剖面
 
-Extract energy profiles along specific paths:
+沿特定路径提取能量剖面：
 
 ```bash
-# Extract energy values along specific PC1 value
-# Requires custom processing of gibbs.xpm
+# 沿特定 PC1 值提取能量值
+- 需要对 gibbs.xpm 进行自定义处理
 ```
 
-## Comparison with Experimental Data
+## 与实验数据的比较
 
-### Compare with NMR Ensemble
+### 与 NMR 集合比较
 
-Overlay NMR structures on FEL to validate conformational sampling.
+将 NMR 结构叠加在 FEL 上以验证构象采样。
 
-### Compare with Crystal Structures
+### 与晶体结构比较
 
-Locate crystal structures on FEL to understand their energetic context.
+在 FEL 上定位晶体结构以了解其能量背景。
 
-### Compare with SAXS
+### 与 SAXS 比较
 
-Calculate theoretical SAXS curves from FEL-derived conformations.
+从 FEL 导出的构象计算理论 SAXS 曲线。
 
-## References
+## 参考文献
 
-For theoretical background, see:
-- Protein folding theory and energy landscapes
-- Transition state theory and barrier crossing
-- Conformational dynamics and free energy calculations
+有关理论背景，请参阅：
+- 蛋白质折叠理论和能量景观
+- 过渡态理论和能垒跨越
+- 构象动力学和自由能计算

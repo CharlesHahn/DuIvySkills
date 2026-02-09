@@ -1,282 +1,282 @@
-# Residue Distance Contact Matrix (RDCM) Analysis
+# 残基距离接触矩阵（RDCM）分析
 
-## Overview
+## 概述
 
-Residue Distance Contact Matrix (RDCM) calculates average distances between residue pairs throughout the simulation, providing insights into inter-residue spatial relationships, long-range contacts, and protein folding patterns.
+残基距离接触矩阵（RDCM）计算整个模拟过程中残基对之间的平均距离，提供关于残基间空间关系、长程接触和蛋白质折叠模式的见解。
 
-## When to Use RDCM
+## 何时使用 RDCM
 
-- Analyze inter-residue contacts and distances
-- Identify long-range interactions
-- Study protein folding/unfolding transitions
-- Analyze domain-domain contacts
-- Validate contact maps from experimental data
-- Study conformational changes
+- 分析残基间接触和距离
+- 识别长程相互作用
+- 研究蛋白质折叠/展开转变
+- 分析结构域间接触
+- 验证来自实验数据的接触图
+- 研究构象变化
 
-## Prerequisites
+## 前提条件
 
-- Trajectory file (.xtc/.trr) - PBC correction optional
-- Topology file (.tpr)
-- Index file (.ndx) with appropriate atom groups
+- 轨迹文件（.xtc/.trr）- PBC 修正是可选的
+- 拓扑文件（.tpr）
+- 包含适当原子组的索引文件（.ndx）
 
-## Workflow
+## 工作流程
 
-### Step 1: Calculate Distance Matrix
+### 步骤 1：计算距离矩阵
 
-Compute average distance matrix between residues:
+计算残基之间的平均距离矩阵：
 
 ```bash
 echo -e "Protein\n" | gmx mdmat -f md.xtc -s md.tpr -mean rdcm.xpm
 ```
 
-- Input: Select Protein group for analysis
+- 输入：选择蛋白质组进行分析
 
-**Parameters**:
-- `-f`: Input trajectory file
-- `-s`: Input topology file
-- `-mean`: Calculate average distance matrix
-- Optional: `-b` and `-e` to specify time range
+**参数**：
+- `-f`：输入轨迹文件
+- `-s`：输入拓扑文件
+- `-mean`：计算平均距离矩阵
+- 可选：`-b` 和 `-e` 指定时间范围
 
-**Output file**:
-- `rdcm.xpm`: Average distance matrix in XPM format
+**输出文件**：
+- `rdcm.xpm`：XPM 格式的平均距离矩阵
 
-### Step 2: Visualize Distance Matrix
+### 步骤 2：可视化距离矩阵
 
-Generate heatmap visualization of the distance matrix:
+生成距离矩阵的热图可视化：
 
 ```bash
 dit xpm_show -f rdcm.xpm -o rdcm.png
 ```
 
-**Optional parameters**:
-- `-cmap viridis`: Use viridis colormap (default works well)
-- `-xmin`, `-xmax`, `-ymin`, `-ymax`: Zoom on specific regions
-- `-m contour`: Use contour plot mode
+**可选参数**：
+- `-cmap viridis`：使用 viridis 颜色图（默认效果良好）
+- `-xmin`、`-xmax`、`-ymin`、`-ymax`：缩放特定区域
+- `-m contour`：使用等高线图模式
 
-### Step 3: Analyze Distance Patterns
+### 步骤 3：分析距离模式
 
-Examine the distance matrix for:
+检查距离矩阵：
 
-- **Diagonal**: Short distances (residues close in sequence)
-- **Off-diagonal patterns**: Long-range contacts between distant residues
-- **Blue regions**: Short distances (close contacts)
-- **Red/yellow regions**: Long distances (no contact)
-- **Changes over time**: Compare matrices from different time windows
+- **对角线**：短距离（序列中接近的残基）
+- **非对角线模式**：远距离残基之间的长程接触
+- **蓝色区域**：短距离（紧密接触）
+- **红色/黄色区域**：长距离（无接触）
+- **随时间变化**：比较来自不同时间窗口的矩阵
 
-## Output Files
+## 输出文件
 
-- **rdcm.xpm**: Average distance matrix (XPM format)
-- **rdcm.png**: Visualization of distance matrix
+- **rdcm.xpm**：平均距离矩阵（XPM 格式）
+- **rdcm.png**：距离矩阵的可视化
 
-## Interpretation Guidelines
+## 解释指南
 
-### Distance Scale
+### 距离标度
 
-The color scale typically represents distances in nanometers:
-- **Dark blue**: < 0.5 nm (close contact)
-- **Blue**: 0.5-1.0 nm (medium distance)
-- **Green/Yellow**: 1.0-2.0 nm (no direct contact)
-- **Red**: > 2.0 nm (distant)
+颜色标度通常以纳米为单位表示距离：
+- **深蓝色**：< 0.5 nm（紧密接触）
+- **蓝色**：0.5-1.0 nm（中等距离）
+- **绿色/黄色**：1.0-2.0 nm（无直接接触）
+- **红色**：> 2.0 nm（遥远）
 
-### Contact Definition
+### 接触定义
 
-Common contact definitions:
-- **< 0.45 nm**: Direct atomic contact
-- **< 0.6 nm**: Short-range interaction
-- **< 1.0 nm**: Medium-range interaction
+常见的接触定义：
+- **< 0.45 nm**：直接原子接触
+- **< 0.6 nm**：短程相互作用
+- **< 1.0 nm**：中程相互作用
 
-### Structural Features
+### 结构特征
 
-- **Secondary structure**: Shows patterns for α-helices and β-sheets
-- **Domain contacts**: Off-diagonal blocks indicate domain-domain interactions
-- **Long-range contacts**: Contacts between distant sequence positions indicate tertiary structure
-- **Flexible regions**: Variable distances indicate flexible loops or unstructured regions
+- **二级结构**：显示 α-螺旋和 β-折叠的模式
+- **结构域接触**：非对角线块表示结构域间相互作用
+- **长程接触**：远距离序列位置之间的接触表示三级结构
+- **柔性区域**：可变距离表示柔性环或非结构化区域
 
-## Common Issues and Solutions
+## 常见问题和解决方案
 
-### Issue: Distance matrix shows uniform high distances
+### 问题：距离矩阵显示均匀的高距离
 
-**Possible causes**:
-- Protein is unfolded or disordered
-- Incorrect atom selection
-- Simulation artifacts
+**可能原因**：
+- 蛋白质展开或无序
+- 原子选择不正确
+- 模拟伪影
 
-**Solutions**:
-- Verify protein structure in simulation
-- Check index file selections
-- Inspect trajectory for artifacts
+**解决方案**：
+- 验证模拟中的蛋白质结构
+- 检查索引文件选择
+- 检查轨迹是否有伪影
 
-### Issue: Distance matrix appears noisy
+### 问题：距离矩阵显示噪声
 
-**Solutions**:
-- Increase simulation time for better averaging
-- Apply time averaging over windows
-- Use larger time steps for analysis
+**解决方案**：
+- 增加模拟时间以获得更好的平均
+- 在窗口上应用时间平均
+- 使用更大的时间步长进行分析
 
-### Issue: Unexpected distance patterns
+### 问题：意外的距离模式
 
-**Solutions**:
-- Verify protein sequence and structure
-- Check for simulation instability
-- Compare with known structures
+**解决方案**：
+- 验证蛋白质序列和结构
+- 检查模拟不稳定性
+- 与已知结构进行比较
 
-## Tips and Best Practices
+## 提示和最佳实践
 
-- **Time selection**: Use consistent time ranges for reproducibility
-- **Averaging**: Longer simulations give better average distance matrices
-- **Comparison**: Compare with experimental contact maps (NMR, cryo-EM)
-- **Domain analysis**: Create domain-specific index groups for detailed analysis
-- **Time evolution**: Calculate matrices for different time windows to study dynamics
+- **时间选择**：使用一致的时间范围以确保可重复性
+- **平均**：更长的模拟提供更好的平均距离矩阵
+- **比较**：与实验接触图进行比较（NMR、cryo-EM）
+- **结构域分析**：创建特定结构域的索引组进行详细分析
+- **时间演变**：为不同时间窗口计算矩阵以研究动力学
 
-## Advanced Analysis
+## 高级分析
 
-### Time-dependent RDCM
+### 时间依赖性 RDCM
 
-Calculate distance matrices for different time windows:
+为不同时间窗口计算距离矩阵：
 
 ```bash
-# Early simulation (0-50 ns)
+# 早期模拟（0-50 ns）
 echo -e "Protein\n" | gmx mdmat -f md.xtc -s md.tpr -b 0 -e 50000 -mean rdcm_early.xpm
 
-# Late simulation (50-100 ns)
+# 晚期模拟（50-100 ns）
 echo -e "Protein\n" | gmx mdmat -f md.xtc -s md.tpr -b 50000 -e 100000 -mean rdcm_late.xpm
 ```
 
-Compare matrices to identify conformational changes.
+比较矩阵以识别构象变化。
 
-### Distance Distributions
+### 距离分布
 
-For specific residue pairs, analyze distance distributions:
+对于特定的残基对，分析距离分布：
 
 ```bash
-# Create index file with specific residues
+# 创建包含特定残基的索引文件
 echo -e "r 50\nname 10 Res50\nr 100\nname 11 Res100\nq\n" | gmx make_ndx -f md.tpr -o pair.ndx
 
-# Calculate distance over time
+# 计算随时间变化的距离
 echo -e "Res50\nRes100\n" | gmx distance -f md.xtc -s md.tpr -n pair.ndx -oall dist_50_100.xvg
 ```
 
-### Contact Maps
+### 接触图
 
-Convert distance matrix to binary contact map:
+将距离矩阵转换为二进制接触图：
 
 ```bash
-# Use DuIvyTools to threshold distances
-# (Requires custom script or manual processing)
+# 使用 DuIvyTools 阈值化距离
+# （需要自定义脚本或手动处理）
 ```
 
-Define contacts as residue pairs with average distance < threshold (typically 0.45-0.6 nm).
+将接触定义为平均距离 < 阈值的残基对（通常为 0.45-0.6 nm）。
 
-### Domain-specific Analysis
+### 特定结构域分析
 
-Calculate distance matrices for specific domains:
+计算特定结构域的距离矩阵：
 
 ```bash
-# Create domain index file
+# 创建结构域索引文件
 echo -e "r 1-100\nname 10 Domain1\nr 101-200\nname 11 Domain2\nq\n" | gmx make_ndx -f md.tpr -o domains.ndx
 
-# Calculate inter-domain distances
+# 计算结构域间距离
 echo -e "Domain1\nDomain2\n" | gmx mdmat -f md.xtc -s md.tpr -mean domain_distance.xpm
 ```
 
-## Related Analyses
+## 相关分析
 
-- **DCCM**: Analyzes correlated motions alongside distances
-- **RMSF**: Provides per-residue flexibility information
-- **Hydrogen bond analysis**: Identifies specific interactions
-- **FEL**: Maps conformational states based on contact patterns
+- **DCCM**：分析相关运动以及距离
+- **RMSF**：提供每个残基的灵活性信息
+- **氢键分析**：识别特定相互作用
+- **FEL**：基于接触模式映射构象状态
 
-## Visualization Enhancements
+## 可视化增强
 
-### Custom Color Schemes
+### 自定义颜色方案
 
-Use different colormaps to highlight features:
+使用不同的颜色图突出显示特征：
 
 ```bash
-# Viridis (default, perceptually uniform)
+# Viridis（默认，感知均匀）
 dit xpm_show -f rdcm.xpm -o rdcm_viridis.png -cmap viridis
 
-# Plasma (alternative perceptually uniform)
+# Plasma（替代的感知均匀）
 dit xpm_show -f rdcm.xpm -o rdcm_plasma.png -cmap plasma
 
-# Coolwarm (diverging, good for differences)
+# Coolwarm（发散，适合差异）
 dit xpm_show -f rdcm.xpm -o rdcm_coolwarm.png -cmap coolwarm
 ```
 
-### Zooming on Regions
+### 缩放区域
 
-Focus on specific regions:
+专注于特定区域：
 
 ```bash
-# Zoom on residues 50-150
+# 缩放残基 50-150
 dit xpm_show -f rdcm.xpm -o rdcm_zoom.png -xmin 50 -xmax 150 -ymin 50 -ymax 150
 ```
 
-### Difference Maps
+### 差异图
 
-Compare distance matrices from different conditions:
+比较来自不同条件的距离矩阵：
 
 ```bash
-# Calculate difference between two matrices
+# 计算两个矩阵之间的差异
 dit xpm_diff -f rdcm_early.xpm rdcm_late.xpm -o rdcm_diff.xpm
 ```
 
-### Thresholding
+### 阈值化
 
-Apply distance threshold to create contact maps:
+应用距离阈值以创建接触图：
 
 ```bash
-# Convert to CSV and threshold
+# 转换为 CSV 并阈值化
 dit xpm2csv -f rdcm.xpm -o rdcm.csv
-# Then process CSV to create binary contact map
+# 然后处理 CSV 以创建二进制接触图
 ```
 
-## Interpretation Examples
+## 解释示例
 
-### Alpha-Helical Proteins
+### α-螺旋蛋白质
 
-Distance matrix shows characteristic pattern:
-- Strong diagonal signal (residues i, i+3, i+4 in helix)
-- Periodic pattern of short distances
+距离矩阵显示特征模式：
+- 强对角线信号（螺旋中的残基 i、i+3、i+4）
+- 短距离的周期性模式
 
-### Beta-Sheet Proteins
+### β-折叠蛋白质
 
-Distance matrix shows:
-- Strong off-diagonal signals for beta-strand pairs
-- Anti-parallel or parallel strand patterns
+距离矩阵显示：
+- β-链对的强非对角线信号
+- 反平行或平行链模式
 
-### Multi-domain Proteins
+### 多结构域蛋白质
 
-Distance matrix shows:
-- Clear separation between domains
-- Inter-domain contacts in off-diagonal regions
-- Variable distances indicating domain flexibility
+距离矩阵显示：
+- 结构域之间的清晰分离
+- 非对角线区域中的结构域间接触
+- 表示结构域灵活性的可变距离
 
-## Validation and Comparison
+## 验证和比较
 
-### Compare with Experimental Data
+### 与实验数据比较
 
-- **NMR**: Compare with NOE distance constraints
-- **Cryo-EM**: Compare with inter-residue distances in structure
-- **Cross-linking**: Compare with cross-link distance constraints
+- **NMR**：与 NOE 距离约束比较
+- **Cryo-EM**：与结构中的残基间距离比较
+- **交联**：与交联距离约束比较
 
-### Compare with Static Structures
+### 与静态结构比较
 
-Calculate distance matrix from crystal structure:
+从晶体结构计算距离矩阵：
 
 ```bash
-# Convert PDB to gro
+# 将 PDB 转换为 gro
 gmx editconf -f structure.pdb -o structure.gro
 
-# Calculate distance matrix
+# 计算距离矩阵
 echo -e "Protein\n" | gmx mdmat -f structure.gro -s structure.gro -mean rdcr_static.xpm
 ```
 
-Compare with simulation-derived matrix to validate simulation.
+与模拟导出的矩阵比较以验证模拟。
 
-## References
+## 参考文献
 
-For theoretical background, see:
-- Contact analysis in molecular dynamics simulations
-- Protein folding and contact map analysis
-- Domain organization and long-range contacts
+有关理论背景，请参阅：
+- 分子动力学模拟中的接触分析
+- 蛋白质折叠和接触图分析
+- 结构域组织和长程接触

@@ -1,282 +1,282 @@
 ---
 name: gromacs-protein-analysis
-description: "Comprehensive guide for analyzing and visualizing protein molecular dynamics simulation results from GROMACS. Use when Claude needs to perform trajectory analysis including: (1) Periodic boundary condition correction for protein or protein-ligand complexes, (2) RMSD analysis to measure structural stability and convergence, (3) RMSF analysis to evaluate per-residue flexibility, (4) Gyrate analysis to assess protein compactness and folding, (5) SASA analysis to study solvent accessibility and surface properties, (6) Dynamics Cross-Correlation Matrix (DCCM) analysis to study correlated atomic motions, (7) Residue distance contact matrix (RDCM) to analyze inter-residue contacts, (8) Principal Component Analysis (PCA) to identify collective motions, (9) Free Energy Landscape (FEL) mapping using RMSD/Gyrate or PCA to understand conformational states"
+description: "用于分析和可视化 GROMACS 蛋白质分子动力学模拟结果的综合指南。当 Claude 需要执行轨迹分析时使用，包括：（1）蛋白质或蛋白质-配体复合物的周期性边界条件修正，（2）RMSD 分析以测量结构稳定性和收敛性，（3）RMSF 分析以评估每个残基的灵活性，（4）Gyrate 分析以评估蛋白质紧致性和折叠状态，（5）SASA 分析以研究溶剂可及性和表面性质，（6）动力学交叉相关矩阵（DCCM）分析以研究相关原子运动，（7）残基距离接触矩阵（RDCM）以分析残基间接触，（8）主成分分析（PCA）以识别集体运动，（9）自由能景观（FEL）映射，使用 RMSD/Gyrate 或 PCA 理解构象状态"
 ---
 
-# GROMACS Protein Analysis
+# GROMACS 蛋白质分析
 
-This skill provides comprehensive workflows for analyzing protein molecular dynamics simulation results from GROMACS. It covers five major analysis types commonly used in protein dynamics studies.
+本技能为分析 GROMACS 蛋白质分子动力学模拟结果提供了综合工作流程。它涵盖了蛋白质动力学研究中常用的九种主要分析类型。
 
-## Prerequisites
+## 前提条件
 
-- GROMACS simulation completed with trajectory files (.xtc/.trr) and topology file (.tpr)
-- Understanding of GROMACS commands (call `gromacs-skills` when needed)
-- For visualization: DuIvyTools skill (call `duivytools-skills` when needed)
+- GROMACS 模拟已完成，包含轨迹文件（.xtc/.trr）和拓扑文件（.tpr）
+- 了解 GROMACS 命令（需要时调用 `gromacs-skills`）
+- 可视化：DuIvyTools 技能（需要时调用 `duivytools-skills`）
 
-## Analysis Types
+## 分析类型
 
-### 1. Periodic Boundary Condition (PBC) Correction
+### 1. 周期性边界条件（PBC）修正
 
-Correct trajectory for PBC artifacts to prevent molecules from crossing box boundaries and ensure proper alignment for downstream analysis.
+修正轨迹以消除 PBC 伪影，防止分子跨越模拟盒边界，确保下游分析的正确对齐。
 
-**Purpose**: Remove PBC artifacts, center protein/ligand, eliminate overall translation/rotation
+**目的**：消除 PBC 伪影，居中蛋白质/配体，消除整体平移/旋转
 
-**Input**: Trajectory file (.xtc), topology file (.tpr), index file (.ndx)
+**输入**：轨迹文件（.xtc），拓扑文件（.tpr），索引文件（.ndx）
 
-**Output**: Corrected trajectory (fit.xtc), corrected topology (fit.tpr)
+**输出**：修正后的轨迹（fit.xtc），修正后的拓扑（fit.tpr）
 
-**When to use**: Before any analysis when molecules cross box boundaries or when RMSD shows abrupt jumps
+**使用时机**：当分子跨越盒边界或 RMSD 显示突然跳跃时进行任何分析之前
 
-**Detailed workflow**: See [PBC Correction Guide](references/pbc-correction.md)
+**详细工作流程**：参见 [PBC 修正指南](references/pbc-correction.md)
 
-### 2. Root Mean Square Deviation (RMSD)
+### 2. 均方根偏差（RMSD）
 
-Calculate RMSD to measure structural stability and assess simulation convergence.
+计算 RMSD 以测量结构稳定性并评估模拟收敛性。
 
-**Purpose**: Monitor structural stability, identify equilibration phase, assess simulation convergence, compare structures
+**目的**：监测结构稳定性，识别平衡阶段，评估模拟收敛性，比较结构
 
-**Input**: Trajectory file (.xtc), topology file (.tpr), reference structure
+**输入**：轨迹文件（.xtc），拓扑文件（.tpr），参考结构
 
-**Output**: RMSD time series (rmsd.xvg), visualization (rmsd.png)
+**输出**：RMSD 时间序列（rmsd.xvg），可视化（rmsd.png）
 
-**Visualization**: Use `duivytools-skills` skill to plot RMSD over time
+**可视化**：使用 `duivytools-skills` 技能绘制 RMSD 随时间的变化
 
-**Detailed workflow**: See [RMSD Analysis Guide](references/rmsd-analysis.md)
+**详细工作流程**：参见 [RMSD 分析指南](references/rmsd-analysis.md)
 
-### 3. Root Mean Square Fluctuation (RMSF)
+### 3. 均方根涨落（RMSF）
 
-Calculate RMSF to evaluate per-residue flexibility and identify flexible/rigid regions.
+计算 RMSF 以评估每个残基的灵活性，识别柔性/刚性区域。
 
-**Purpose**: Identify flexible regions, assess local stability, analyze loop dynamics, compare residue flexibility
+**目的**：识别柔性区域，评估局部稳定性，分析环动力学，比较残基灵活性
 
-**Input**: Trajectory file (.xtc), topology file (.tpr), index file (.ndx)
+**输入**：轨迹文件（.xtc），拓扑文件（.tpr），索引文件（.ndx）
 
-**Output**: RMSF per residue (rmsf.xvg), B-factors (bfactor.pdb), visualization (rmsf.png)
+**输出**：每个残基的 RMSF（rmsf.xvg），B 因子（bfactor.pdb），可视化（rmsf.png）
 
-**Visualization**: Use `duivytools-skills` skill to plot RMSF per residue
+**可视化**：使用 `duivytools-skills` 技能绘制每个残基的 RMSF
 
-**Detailed workflow**: See [RMSF Analysis Guide](references/rmsf-analysis.md)
+**详细工作流程**：参见 [RMSF 分析指南](references/rmsf-analysis.md)
 
-### 4. Radius of Gyration (Gyrate)
+### 4. 回转半径（Gyrate）
 
-Calculate radius of gyration to assess protein compactness and folding state.
+计算回转半径以评估蛋白质紧致性和折叠状态。
 
-**Purpose**: Monitor protein compactness, detect unfolding/folding transitions, assess overall size changes
+**目的**：监测蛋白质紧致性，检测展开/折叠转变，评估整体大小变化
 
-**Input**: Trajectory file (.xtc), topology file (.tpr), index file (.ndx)
+**输入**：轨迹文件（.xtc），拓扑文件（.tpr），索引文件（.ndx）
 
-**Output**: Gyrate time series (gyrate.xvg), per-axis data (gyrate_axes.xvg), visualization (gyrate.png)
+**输出**：Gyrate 时间序列（gyrate.xvg），每个轴的数据（gyrate_axes.xvg），可视化（gyrate.png）
 
-**Visualization**: Use `duivytools-skills` skill to plot gyrate over time
+**可视化**：使用 `duivytools-skills` 技能绘制 Gyrate 随时间的变化
 
-**Detailed workflow**: See [Gyrate Analysis Guide](references/gyrate-analysis.md)
+**详细工作流程**：参见 [Gyrate 分析指南](references/gyrate-analysis.md)
 
-### 5. Solvent Accessible Surface Area (SASA)
+### 5. 溶剂可及表面积（SASA）
 
-Calculate SASA to study solvent accessibility and surface properties of the protein.
+计算 SASA 以研究蛋白质的溶剂可及性和表面性质。
 
-**Purpose**: Analyze solvent exposure, identify hydrophobic/hydrophilic surfaces, study ligand binding sites, monitor protein unfolding
+**目的**：分析溶剂暴露，识别疏水/亲水表面，研究配体结合位点，监测蛋白质展开
 
-**Input**: Trajectory file (.xtc), topology file (.tpr), index file (.ndx)
+**输入**：轨迹文件（.xtc），拓扑文件（.tpr），索引文件（.ndx）
 
-**Output**: Total SASA time series (sas.xvg), per-residue SASA (sas_per_residue.xvg), visualization (sas.png)
+**输出**：总 SASA 时间序列（sas.xvg），每个残基的 SASA（sas_per_residue.xvg），可视化（sas.png）
 
-**Visualization**: Use `duivytools-skills` skill to plot SASA over time
+**可视化**：使用 `duivytools-skills` 技能绘制 SASA 随时间的变化
 
-**Detailed workflow**: See [SASA Analysis Guide](references/sasa-analysis.md)
+**详细工作流程**：参见 [SASA 分析指南](references/sasa-analysis.md)
 
-### 6. Dynamics Cross-Correlation Matrix (DCCM)
+### 6. 动力学交叉相关矩阵（DCCM）
 
-Analyze correlated motions between atomic pairs to identify coordinated movements in the protein.
+分析原子对之间的相关运动，识别蛋白质中的协调运动。
 
-**Purpose**: Identify pairs of atoms that move together (positive correlation) or opposite (negative correlation)
+**目的**：识别一起移动的原子对（正相关）或反向移动的原子对（负相关）
 
-**Input**: Trajectory file (.xtc), topology file (.tpr), index file (.ndx)
+**输入**：轨迹文件（.xtc），拓扑文件（.tpr），索引文件（.ndx）
 
-**Output**: Covariance matrix (covar.dat), DCCM matrix (dccm.xpm), visualization (dccm.png)
+**输出**：协方差矩阵（covar.dat），DCCM 矩阵（dccm.xpm），可视化（dccm.png）
 
-**Visualization**: Use `duivytools-skills` skill to generate heatmaps
+**可视化**：使用 `duivytools-skills` 技能生成热图
 
-**Detailed workflow**: See [DCCM Analysis Guide](references/dccm-analysis.md)
+**详细工作流程**：参见 [DCCM 分析指南](references/dccm-analysis.md)
 
-### 7. Residue Distance Contact Matrix (RDCM)
+### 7. 残基距离接触矩阵（RDCM）
 
-Calculate average distances between residue pairs to analyze inter-residue contacts and spatial relationships.
+计算残基对之间的平均距离，分析残基间接触和空间关系。
 
-**Purpose**: Map residue-residue distances, identify long-range contacts, analyze protein structure
+**目的**：绘制残基-残基距离，识别长程接触，分析蛋白质结构
 
-**Input**: Trajectory file (.xtc), topology file (.tpr), index file (.ndx)
+**输入**：轨迹文件（.xtc），拓扑文件（.tpr），索引文件（.ndx）
 
-**Output**: Distance contact matrix (rdcm.xpm), visualization (rdcm.png)
+**输出**：距离接触矩阵（rdcm.xpm），可视化（rdcm.png）
 
-**Visualization**: Use `duivytools-skills` skill to generate heatmaps
+**可视化**：使用 `duivytools-skills` 技能生成热图
 
-**Detailed workflow**: See [RDCM Analysis Guide](references/rdcm-analysis.md)
+**详细工作流程**：参见 [RDCM 分析指南](references/rdcm-analysis.md)
 
-### 8. Principal Component Analysis (PCA)
+### 8. 主成分分析（PCA）
 
-Identify collective motions and dominant conformational changes by decomposing protein motion into principal components.
+通过将蛋白质运动分解为主成分，识别集体运动和主要构象变化。
 
-**Purpose**: Extract major collective motions, analyze conformational flexibility, reduce dimensionality
+**目的**：提取主要集体运动，分析构象灵活性，降维
 
-**Input**: Trajectory file (.xtc), topology file (.tpr), index file (.ndx)
+**输入**：轨迹文件（.xtc），拓扑文件（.tpr），索引文件（.ndx）
 
-**Output**: Eigenvalues (eigenvalues.xvg), eigenvectors (eigenvectors.trr), projections (pc1.xvg, pc2.xvg)
+**输出**：特征值（eigenvalues.xvg），特征向量（eigenvectors.trr），投影（pc1.xvg, pc2.xvg）
 
-**Key metrics**: First few PCs' contribution percentages
+**关键指标**：前几个主成分的贡献百分比
 
-**Visualization**: Use `duivytools-skills` skill to plot eigenvalues and projections
+**可视化**：使用 `duivytools-skills` 技能绘制特征值和投影
 
-**Detailed workflow**: See [PCA Analysis Guide](references/pca-analysis.md)
+**详细工作流程**：参见 [PCA 分析指南](references/pca-analysis.md)
 
-### 9. Free Energy Landscape (FEL)
+### 9. 自由能景观（FEL）
 
-Map free energy surfaces to understand conformational states and transitions using either RMSD/Gyrate or PCA.
+绘制自由能表面，使用 RMSD/Gyrate 或 PCA 理解构象状态和转变。
 
-**Purpose**: Identify stable conformations, quantify energy barriers, understand conformational landscape
+**目的**：识别稳定构象，量化能垒，理解构象景观
 
-**Method 1 - RMSD + Gyrate**: Use structural deviation and compactness as reaction coordinates
+**方法 1 - RMSD + Gyrate**：使用结构偏差和紧致性作为反应坐标
 
-**Method 2 - PCA**: Use principal components as reaction coordinates
+**方法 2 - PCA**：使用主成分作为反应坐标
 
-**Input**: RMSD data (rmsd.xvg), Gyrate data (gyrate.xvg) OR PC projections (pc1.xvg, pc2.xvg)
+**输入**：RMSD 数据（rmsd.xvg），Gyrate 数据（gyrate.xvg）或 PC 投影（pc1.xvg, pc2.xvg）
 
-**Output**: Free energy landscape (gibbs.xpm), energy minima (gibbs.log), frame indices (bindex.ndx), visualization (fel.png)
+**输出**：自由能景观（gibbs.xpm），能量极小值（gibbs.log），帧索引（bindex.ndx），可视化（fel.png）
 
-**Visualization**: Use `duivytools-skills` skill to generate 2D/3D FEL plots
+**可视化**：使用 `duivytools-skills` 技能生成 2D/3D FEL 图
 
-**Detailed workflow**: See [FEL Analysis Guide](references/fel-analysis.md)
+**详细工作流程**：参见 [FEL 分析指南](references/fel-analysis.md)
 
-## General Workflow
+## 通用工作流程
 
-### Before Any Analysis
+### 任何分析之前
 
-1. **Check trajectory quality**: Visual inspection of trajectory for artifacts
-2. **PBC correction** (if needed): Use PBC correction workflow
-3. **Ensure consistent atom selection**: Use same index groups for related analyses
+1. **检查轨迹质量**：目视检查轨迹是否有伪影
+2. **PBC 修正**（如需要）：使用 PBC 修正工作流程
+3. **确保一致的原子选择**：对相关分析使用相同的索引组
 
-### Analysis Independence
+### 分析独立性
 
-Most analyses are independent and can be performed in any order:
+大多数分析是独立的，可以按任意顺序进行：
 
-**Independent analyses** (no dependencies):
-- RMSD, RMSF, Gyrate, SASA - Basic stability and property analysis
-- DCCM, RDCM - Contact and correlation analysis
-- PCA - Collective motion analysis
+**独立分析**（无依赖）：
+- RMSD、RMSF、Gyrate、SASA - 基本稳定性和性质分析
+- DCCM、RDCM - 接触和相关分析
+- PCA - 集体运动分析
 
-**Dependent analyses** (require other analyses):
-- FEL - Requires RMSD/Gyrate OR PCA results as reaction coordinates
+**依赖分析**（需要其他分析）：
+- FEL - 需要 RMSD/Gyrate 或 PCA 结果作为反应坐标
 
-### Recommended Pre-Analysis Step
+### 推荐的预分析步骤
 
-**PBC Correction** (optional but recommended):
-- Consider PBC correction if RMSD shows abrupt jumps or molecules cross box boundaries
-- PBC correction is not always necessary - only apply when indicated by trajectory quality
-- Analysis issues may have other causes beyond PBC artifacts
+**PBC 修正**（可选但建议）：
+- 如果 RMSD 显示突然跳跃或分子跨越盒边界，考虑 PBC 修正
+- PBC 修正并非总是必要的 - 仅在轨迹质量指示时应用
+- 分析问题可能有 PBC 伪影以外的其他原因
 
-### After Each Analysis
+### 每次分析之后
 
-- **Verify output files**: Check that all expected files are generated
-- **Visual inspection**: Use appropriate visualization to assess results
-- **Documentation**: Record analysis parameters and observations
+- **验证输出文件**：检查是否生成了所有预期文件
+- **目视检查**：使用适当的可视化评估结果
+- **文档记录**：记录分析参数和观察结果
 
-## Key Considerations
+## 关键考虑因素
 
-### Atom Selection
+### 原子选择
 
-- **Backbone**: For overall protein motion and RMSD analysis
-- **C-alpha**: For PCA and DCCM (reduces computational cost)
-- **Protein**: For full protein analysis
-- **Protein_Lig**: For protein-ligand complexes
+- **主链**：用于整体蛋白质运动和 RMSD 分析
+- **C-alpha**：用于 PCA 和 DCCM（降低计算成本）
+- **蛋白质**：用于全蛋白质分析
+- **Protein_Lig**：用于蛋白质-配体复合物
 
-### Time Selection
+### 时间选择
 
-- **Equilibration phase**: Exclude initial equilibration period (typically first 10-20% of simulation)
-- **Production phase**: Use production phase for analysis
-- **Consistency**: Use same time range for related analyses
+- **平衡阶段**：排除初始平衡期（通常是模拟的前 10-20%）
+- **生产阶段**：使用生产阶段进行分析
+- **一致性**：对相关分析使用相同的时间范围
 
-### Index Groups
+### 索引组
 
-- Create appropriate index groups using `gmx make_ndx`
-- Ensure index groups match analysis requirements
-- Document index group compositions
+- 使用 `gmx make_ndx` 创建适当的索引组
+- 确保索引组符合分析要求
+- 记录索引组的组成
 
-## When to Call DuIvyTools-Skills
+## 何时调用 DuIvyTools-Skills
 
-Call the `duivytools-skills` skill for visualization tasks:
+为可视化任务调用 `duivytools-skills` 技能：
 
-- **XVG files**: Plot RMSD, RMSF, energies, hydrogen bonds, gyrate
-- **XPM files**: Visualize DCCM, RDCM, FEL matrices
-- **Projections**: Plot PC1, PC2 projections
-- **Statistical analysis**: Calculate averages, distributions
+- **XVG 文件**：绘制 RMSD、RMSF、能量、氢键、Gyrate
+- **XPM 文件**：可视化 DCCM、RDCM、FEL 矩阵
+- **投影**：绘制 PC1、PC2 投影
+- **统计分析**：计算平均值、分布
 
-## Troubleshooting
+## 故障排除
 
-### Common Issues
+### 常见问题
 
-**RMSD shows abrupt jumps**: PBC artifacts - apply PBC correction
+**RMSD 显示突然跳跃**：PBC 伪影 - 应用 PBC 修正
 
-**DCCM values all near zero**: Check atom selection, ensure sufficient dynamics
+**DCCM 值都接近零**：检查原子选择，确保有足够的动力学
 
-**PCA shows uniform eigenvalues**: May indicate no dominant collective motion or excessive noise
+**PCA 显示均匀的特征值**：可能表示没有主导的集体运动或过多的噪声
 
-**FEL shows unrealistic barriers**: Check time range selection, ensure sufficient sampling
+**FEL 显示不切实际的能垒**：检查时间范围选择，确保足够的采样
 
-**Files don't match**: Verify tpr and xtc have same atom count, use `gmx convert-tpr` if needed
+**文件不匹配**：验证 tpr 和 xtc 具有相同的原子数，如需要使用 `gmx convert-tpr`
 
-## Reference Documentation
+## 参考文档
 
-For detailed step-by-step workflows, consult these references:
+有关详细的逐步工作流程，请参阅这些参考资料：
 
-### Basic Analysis
+### 基础分析
 
-- **[PBC Correction Guide](references/pbc-correction.md)** - Complete PBC correction workflow
-- **[RMSD Analysis Guide](references/rmsd-analysis.md)** - Root mean square deviation for stability assessment
-- **[RMSF Analysis Guide](references/rmsf-analysis.md)** - Root mean square fluctuation for flexibility analysis
-- **[Gyrate Analysis Guide](references/gyrate-analysis.md)** - Radius of gyration for compactness analysis
-- **[SASA Analysis Guide](references/sasa-analysis.md)** - Solvent accessible surface area for surface properties
+- **[PBC 修正指南](references/pbc-correction.md)** - 完整的 PBC 修正工作流程
+- **[RMSD 分析指南](references/rmsd-analysis.md)** - 用于稳定性评估的均方根偏差
+- **[RMSF 分析指南](references/rmsf-analysis.md)** - 用于灵活性分析的均方根涨落
+- **[Gyrate 分析指南](references/gyrate-analysis.md)** - 用于紧致性分析的回转半径
+- **[SASA 分析指南](references/sasa-analysis.md)** - 用于表面性质的溶剂可及表面积
 
-### Advanced Analysis
+### 高级分析
 
-- **[DCCM Analysis Guide](references/dccm-analysis.md)** - DCCM calculation and interpretation
-- **[RDCM Analysis Guide](references/rdcm-analysis.md)** - Distance contact matrix analysis
-- **[PCA Analysis Guide](references/pca-analysis.md)** - Principal component analysis workflow
-- **[FEL Analysis Guide](references/fel-analysis.md)** - Free energy landscape mapping
+- **[DCCM 分析指南](references/dccm-analysis.md)** - DCCM 计算和解释
+- **[RDCM 分析指南](references/rdcm-analysis.md)** - 距离接触矩阵分析
+- **[PCA 分析指南](references/pca-analysis.md)** - 主成分分析工作流程
+- **[FEL 分析指南](references/fel-analysis.md)** - 自由能景观映射
 
-## Quick Reference
+## 快速参考
 
-### Required Input Files
+### 必需的输入文件
 
-- **Trajectory**: .xtc or .trr file from GROMACS simulation
-- **Topology**: .tpr file (must match trajectory atom count)
-- **Index**: .ndx file with custom atom groups
+- **轨迹**：来自 GROMACS 模拟的 .xtc 或 .trr 文件
+- **拓扑**：.tpr 文件（必须与轨迹原子数匹配）
+- **索引**：包含自定义原子组的 .ndx 文件
 
-### Common Output Files
+### 常见输出文件
 
-- **XVG**: Time-series data (RMSD, eigenvalues, projections)
-- **XPM**: Matrix data (DCCM, RDCM, FEL)
-- **TRR**: Vector data (eigenvectors)
-- **PDB**: Structure files (average, extreme conformations)
+- **XVG**：时间序列数据（RMSD、特征值、投影）
+- **XPM**：矩阵数据（DCCM、RDCM、FEL）
+- **TRR**：向量数据（特征向量）
+- **PDB**：结构文件（平均、极端构象）
 
-### Analysis Order Recommendation
+### 分析顺序建议
 
-Analyses can be performed flexibly based on your research questions:
+可以根据研究问题灵活进行分析：
 
-**For basic stability assessment**: Start with RMSD, RMSF, Gyrate, SASA (any order)
+**用于基本稳定性评估**：从 RMSD、RMSF、Gyrate、SASA 开始（任意顺序）
 
-**For contact and correlation analysis**: Perform DCCM and RDCM (independent)
+**用于接触和相关分析**：执行 DCCM 和 RDCM（独立）
 
-**For collective motion analysis**: Perform PCA (independent)
+**用于集体运动分析**：执行 PCA（独立）
 
-**For conformational landscape**: Generate FEL after obtaining RMSD/Gyrate or PCA data
+**用于构象景观**：在获得 RMSD/Gyrate 或 PCA 数据后生成 FEL
 
-**Note**: Consider PBC correction only if RMSD shows abrupt jumps or trajectory quality issues or User asks. Many analyses work fine without PBC correction.
+**注意**：仅当 RMSD 显示突然跳跃或轨迹质量问题或用户要求时考虑 PBC 修正。许多分析在没有 PBC 修正的情况下也能正常工作。
 
-## Best Practices
+## 最佳实践
 
-- **Never overwrite** existing files - use unique output filenames
-- **Use consistent time ranges** for all related analyses
-- **Document all parameters** and index group selections
-- **Visualize intermediate results** to catch issues early
-- **Verify atom count consistency** between tpr and xtc files
-- **Check statistical convergence** before interpreting results
+- **永远不要覆盖**现有文件 - 使用唯一的输出文件名
+- **对所有相关分析使用一致的时间范围**
+- **记录所有参数**和索引组选择
+- **可视化中间结果**以尽早发现问题
+- **验证原子数一致性**在 tpr 和 xtc 文件之间
+- **在解释结果之前检查统计收敛性**

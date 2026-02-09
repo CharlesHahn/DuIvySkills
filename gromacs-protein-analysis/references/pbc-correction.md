@@ -1,185 +1,185 @@
-# Periodic Boundary Condition (PBC) Correction
+# 周期性边界条件（PBC）修正
 
-## Overview
+## 概述
 
-Periodic boundary condition (PBC) correction removes artifacts from molecules crossing simulation box boundaries. This correction may be necessary when trajectory quality issues are observed (e.g., abrupt RMSD jumps). Many analyses work fine without PBC correction.
+周期性边界条件（PBC）修正消除了分子跨越模拟盒边界产生的伪影。当观察到轨迹质量问题（例如 RMSD 突然跳跃）时，可能需要进行此修正。许多分析在没有 PBC 修正的情况下也能正常工作。
 
-## When to Apply PBC Correction
+## 何时应用 PBC 修正
 
-- Molecules (protein or ligand) cross box boundaries
-- RMSD/RMSF plots show abrupt jumps or discontinuities
-- Visualization shows fragmented molecules
+- 分子（蛋白质或配体）跨越盒边界
+- RMSD/RMSF 图显示突然跳跃或不连续性
+- 可视化显示分子碎片化
 
-Note: PBC correction is optional. Only apply when you observe the above issues. Analysis problems may have other causes beyond PBC artifacts.
+注意：PBC 修正是可选的。仅在观察到上述问题时应用。分析问题可能有 PBC 伪影以外的其他原因。
 
-## Prerequisites
+## 前提条件
 
-- Input trajectory file (.xtc)
-- Topology file (.tpr)
-- Index file (.ndx) with appropriate atom groups
+- 输入轨迹文件（.xtc）
+- 拓扑文件（.tpr）
+- 包含适当原子组的索引文件（.ndx）
 
-## Workflow
+## 工作流程
 
-### Step 1: Prepare Index File
+### 步骤 1：准备索引文件
 
-Create or modify index file to include necessary groups:
+创建或修改索引文件以包含必要的组：
 
 ```bash
-# Create basic index file
+# 创建基本索引文件
 gmx make_ndx -f md.tpr -o index.ndx
 
-# Add protein-ligand group if needed
+# 如果需要，添加蛋白质-配体组
 echo -e "Protein | Ligand\nq\n" | gmx make_ndx -f md.tpr -o index.ndx
 ```
 
-### Step 2: Find Center Atom
+### 步骤 2：找到中心原子
 
-Find atom closest to geometric center for proper centering:
+找到最接近几何中心的原子以进行适当的居中：
 
 ```bash
-# Use DuIvyTools to find center atom
+# 使用 DuIvyTools 查找中心原子
 echo -e "Protein\n" | dit find_center -f npt.gro index.ndx
 ```
 
-The output shows the atom number closest to the center. Note this atom number.
+输出显示最接近中心的原子编号。记录此原子编号。
 
-### Step 3: Add Center Group to Index File
+### 步骤 3：将中心组添加到索引文件
 
-Manually add a center group to the index file with the identified atom:
+手动将中心组添加到索引文件中，包含识别的原子：
 
 ```bash
-# Add center group to index.ndx
+# 将中心组添加到 index.ndx
 echo -e "\n[ center ]\n<atom_number>\n" >> index.ndx
 ```
 
-Replace `<atom_number>` with the actual atom number from Step 2.
+将 `<atom_number>` 替换为步骤 2 中的实际原子编号。
 
-### Step 4: Center the Trajectory
+### 步骤 4：居中轨迹
 
-Center the system using the center atom:
+使用中心原子居中系统：
 
 ```bash
 echo -e "center\nProtein_Lig\n" | gmx trjconv -s md.tpr -f md.xtc -o center.xtc -n index.ndx -pbc atom -center
 ```
 
-- First input: Select center group
-- Second input: Select output group (Protein_Lig)
+- 第一个输入：选择中心组
+- 第二个输入：选择输出组（Protein_Lig）
 
-### Step 5: Ensure Molecular Integrity
+### 步骤 5：确保分子完整性
 
-Keep molecules intact across periodic boundaries:
+保持分子在周期性边界中的完整性：
 
 ```bash
 echo -e "Protein_Lig\n" | gmx trjconv -s md.tpr -f center.xtc -o mol.xtc -n index.ndx -pbc mol -ur compact
 ```
 
-- Input: Select group to keep intact (Protein_Lig)
+- 输入：选择要保持完整的组（Protein_Lig）
 
-### Step 6: Remove Overall Translation and Rotation
+### 步骤 6：消除整体平移和旋转
 
-Fit trajectory to remove overall motion (optional but recommended):
+拟合轨迹以消除整体运动（可选但建议）：
 
 ```bash
 echo -e "Backbone\nProtein_Lig\n" | gmx trjconv -s md.tpr -f mol.xtc -o fit.xtc -n index.ndx -fit rot+trans
 ```
 
-- First input: Select reference structure for fitting (Backbone)
-- Second input: Select output group (Protein_Lig)
+- 第一个输入：选择用于拟合的参考结构（Backbone）
+- 第二个输入：选择输出组（Protein_Lig）
 
-### Step 7: Update Topology File
+### 步骤 7：更新拓扑文件
 
-Update topology file to match corrected trajectory atom count:
+更新拓扑文件以匹配修正后的轨迹原子数：
 
 ```bash
 echo -e "Protein_Lig\n" | gmx convert-tpr -s md.tpr -o fit.tpr -n index.ndx
 ```
 
-- Input: Select same group used in Step 6
+- 输入：选择步骤 6 中使用的相同组
 
-### Step 8: Verify Correction
+### 步骤 8：验证修正
 
-Visual inspection of corrected trajectory:
+目视检查修正后的轨迹：
 
 ```bash
-# Convert to PDB for visual inspection
+# 转换为 PDB 以进行目视检查
 echo -e "Protein_Lig\n" | gmx trjconv -s md.tpr -f fit.xtc -o fit.pdb -dt 1000 -n index.ndx
 ```
 
-Use PyMOL or VMD to inspect the PDB file. Check that:
-- Molecules are intact and not fragmented
-- Protein/ligand remains centered
-- No molecules cross box boundaries
+使用 PyMOL 或 VMD 检查 PDB 文件。检查以下内容：
+- 分子完整且未碎片化
+- 蛋白质/配体保持居中
+- 没有分子跨越盒边界
 
-## Output Files
+## 输出文件
 
-- **center.xtc**: Centered trajectory
-- **mol.xtc**: Trajectory with intact molecules
-- **fit.xtc**: Final corrected trajectory (no translation/rotation)
-- **fit.tpr**: Corrected topology file
-- **fit.pdb**: Sample structure for visual inspection
+- **center.xtc**：居中的轨迹
+- **mol.xtc**：具有完整分子的轨迹
+- **fit.xtc**：最终修正的轨迹（无平移/旋转）
+- **fit.tpr**：修正后的拓扑文件
+- **fit.pdb**：用于目视检查的样本结构
 
-## Common Issues and Solutions
+## 常见问题和解决方案
 
-### Issue: Molecules still fragmented after correction
+### 问题：修正后分子仍然碎片化
 
-**Solution**: Check that the correct atom group is selected in Step 5. Ensure the group includes all atoms that should remain intact.
+**解决方案**：检查步骤 5 中是否选择了正确的原子组。确保该组包含所有应保持完整的原子。
 
-### Issue: Trajectory still shows PBC artifacts
+### 问题：轨迹仍然显示 PBC 伪影
 
-**Solution**: Verify the center atom selection in Step 2. The center atom should be close to the geometric center of the system.
+**解决方案**：验证步骤 2 中的中心原子选择。中心原子应接近系统的几何中心。
 
-### Issue: tpr and xtc atom count mismatch
+### 问题：tpr 和 xtc 原子数不匹配
 
-**Solution**: Always run Step 7 to update topology file after any group selection changes.
+**解决方案**：在任何组选择更改后，始终运行步骤 7 以更新拓扑文件。
 
-### Issue: RMSD still shows jumps after correction
+### 问题：修正后 RMSD 仍然显示跳跃
 
-**Solution**: Check if the reference structure for RMSD calculation is appropriate. Consider using the average structure as reference.
+**解决方案**：检查 RMSD 计算的参考结构是否合适。考虑使用平均结构作为参考。
 
-## Tips and Best Practices
+## 提示和最佳实践
 
-- **Use appropriate time intervals**: When converting to PDB for inspection, use `-dt` parameter to limit output size
-- **Document atom selections**: Keep track of which atoms are in each index group
-- **Consistent group selection**: Use the same groups for all related analyses
-- **Visual inspection**: Always visually inspect corrected trajectory before downstream analysis
-- **Never overwrite existing files**: Use unique output filenames to preserve original data
+- **使用适当的时间间隔**：转换为 PDB 进行检查时，使用 `-dt` 参数限制输出大小
+- **记录原子选择**：跟踪每个索引组中的原子
+- **一致的组选择**：对所有相关分析使用相同的组
+- **目视检查**：在下游分析之前始终目视检查修正后的轨迹
+- **永远不要覆盖现有文件**：使用唯一的输出文件名以保留原始数据
 
-## Related Analyses
+## 相关分析
 
-PBC correction may benefit analyses where RMSD shows abrupt jumps:
-- RMSD/RMSF analysis
-- DCCM analysis
-- PCA analysis
-- FEL analysis
-- Any structural analysis requiring aligned trajectories
+PBC 修正可能受益于 RMSD 显示突然跳跃的分析：
+- RMSD/RMSF 分析
+- DCCM 分析
+- PCA 分析
+- FEL 分析
+- 任何需要对齐轨迹的结构分析
 
-Note: PBC correction is optional and not always necessary. Apply only when trajectory quality issues are observed.
+注意：PBC 修正是可选的，并非总是必要的。仅在观察到轨迹质量问题时应用。
 
-## Alternative Approaches
+## 替代方法
 
-### Alternative 1: Single-step correction
+### 替代方法 1：单步修正
 
-Combine centering and molecular integrity in one step:
+在一个步骤中合并居中和分子完整性：
 
 ```bash
 echo -e "center\nProtein_Lig\n" | gmx trjconv -s md.tpr -f md.xtc -o fit.xtc -n index.ndx -pbc mol -center
 ```
 
-### Alternative 2: Use protein center
+### 替代方法 2：使用蛋白质中心
 
-Use protein mass center instead of specific atom:
+使用蛋白质质心而不是特定原子：
 
 ```bash
 echo -e "Protein\nProtein_Lig\n" | gmx trjconv -s md.tpr -f md.xtc -o fit.xtc -n index.ndx -pbc mol -center
 ```
 
-## Visualization
+## 可视化
 
-Use DuIvyTools skill to visualize corrected trajectory:
+使用 DuIvyTools 技能可视化修正后的轨迹：
 
 ```bash
-# Plot RMSD to verify correction
+# 绘制 RMSD 以验证修正
 dit xvg_show -f rmsd_corrected.xvg -x "Time (ns)" -y "RMSD (nm)"
 ```
 
-The corrected RMSD should show smooth progression without abrupt jumps.
+修正后的 RMSD 应显示平滑进展，没有突然跳跃。
