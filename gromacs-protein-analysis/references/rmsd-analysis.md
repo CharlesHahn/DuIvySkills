@@ -1,4 +1,4 @@
-# 均方根偏差（RMSD）分析
+﻿# 均方根偏差（RMSD）分析
 
 ## 概述
 
@@ -306,3 +306,8 @@ dit xvg_show -f rmsd_sim1.xvg rmsd_sim2.xvg rmsd_sim3.xvg -x "Time (ns)" -y "RMS
 有关理论背景，请参阅：
 - Marti-Renom 等人（2002）"Comparative protein structure modeling of genes and genomes"
 - Kuhlman 和 Baker（2000）"Native protein sequences are close to optimal for their structures"
+
+
+
+
+

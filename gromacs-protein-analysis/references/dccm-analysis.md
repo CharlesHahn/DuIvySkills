@@ -1,8 +1,8 @@
-# 动力学交叉相关矩阵（DCCM）分析
+﻿# 动态互相关矩阵（DCCM）分析
 
 ## 概述
 
-动力学交叉相关矩阵（DCCM）分析蛋白质中原子对之间的相关运动。正相关（红色）表示原子一起移动，而负相关（蓝色）表示相反运动。
+动态互相关矩阵（DCCM）分析蛋白质中原子对之间的相关运动。正相关（红色）表示原子一起移动，而负相关（蓝色）表示相反运动。
 
 ## 何时使用 DCCM
 
@@ -40,7 +40,7 @@ echo -e "C-alpha\nC-alpha\n" | gmx covar -s md.tpr -f md.xtc -o eigenvalues.xvg 
 
 ### 步骤 2：转换为 DCCM
 
-将协方差矩阵转换为动力学交叉相关矩阵：
+将协方差矩阵转换为动态互相关矩阵：
 
 ```bash
 dit dccm_ascii -f covar.dat -o dccm.xpm
@@ -75,7 +75,7 @@ dit xpm_show -f dccm.xpm -o dccm.png -zmin -1 -zmax 1 -cmap bwr -m contour
 
 - **covar.dat**：原始协方差矩阵（ASCII 格式）
 - **covar.xpm**：协方差矩阵（XPM 格式）
-- **dccm.xpm**：动力学交叉相关矩阵
+- **dccm.xpm**：动态互相关矩阵
 - **dccm.png**：DCCM 的可视化
 - **eigenvalues.xvg**：特征值（对 PCA 有用）
 - **eigenvectors.trr**：特征向量（对 PCA 有用）
@@ -206,3 +206,8 @@ dit xpm_show -f dccm.xpm -o dccm_zoom.png -xmin 50 -xmax 100 -ymin 50 -ymax 100 
 有关理论背景，请参阅：
 - Lange 和 Grubmüller（2006）"Full correlation analysis of protein dynamics"
 - Hünenberger 等人（1995）"Dynamical properties of the solvent and the solute in proteins"
+
+
+
+
+

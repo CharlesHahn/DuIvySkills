@@ -1,4 +1,4 @@
-# 溶剂可及表面积（SASA）分析
+﻿# 溶剂可及表面积（SASA）分析
 
 ## 概述
 
@@ -452,3 +452,8 @@ SASA ≈ A0 × N^α
 - Lee 和 Richards（1971）"Interpretation of protein structures: estimation of static accessibility"
 - Shrake 和 Rupley（1973）"Environment and exposure to solvent of protein atoms"
 - Richmond（1984）"Solvent accessible surface area and excluded volume in proteins"
+
+
+
+
+

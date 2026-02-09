@@ -1,4 +1,4 @@
-# 蛋白质动力学的主成分分析（PCA）
+﻿# 蛋白质动力学的主成分分析（PCA）
 
 ## 概述
 
@@ -164,7 +164,7 @@ echo -e "C-alpha\nC-alpha\n" | gmx anaeig -s md.tpr -f md.xtc -v eigenvectors.tr
 ### 生物学解释
 
 - **结构域运动**：结构域之间的大规模运动
-- **环灵活性**：环和末端的局部运动
+- **环灵活性**：环和末端 (terminus)的局部运动
 - **变构途径**：表示变构通讯的相关运动
 - **功能运动**：与蛋白质活性相关的运动（例如，铰链弯曲、通道开放）
 
@@ -315,3 +315,8 @@ echo -e "C-alpha\nC-alpha\n" | gmx anaeig -s md.tpr -f md.xtc -v eigenvectors.tr
 - Amadei 等人（1993）"Essential dynamics of proteins"
 - García（1992）"Large-amplitude collective motions in proteins"
 - Berendsen 和 Hayward（2000）"Collective variables and molecular dynamics"
+
+
+
+
+

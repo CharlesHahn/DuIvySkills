@@ -1,4 +1,4 @@
-# 回转半径（Gyrate）分析
+﻿# 回转半径（Gyrate）分析
 
 ## 概述
 
@@ -421,3 +421,8 @@ A = 1 - 3 × (Rg_x × Rg_y × Rg_z) / (Rg_x² + Rg_y² + Rg_z²)^1.5
 - Flory（1953）"Principles of Polymer Chemistry"
 - Miller 等人（2002）"Radius of gyration of proteins"
 - Kohn 等人（2004）"Dynamics of protein folding"
+
+
+
+
+

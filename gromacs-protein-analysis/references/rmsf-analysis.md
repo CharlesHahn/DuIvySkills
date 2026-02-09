@@ -1,4 +1,4 @@
-# 均方根涨落（RMSF）分析
+﻿# 均方根涨落（RMSF）分析
 
 ## 概述
 
@@ -143,11 +143,11 @@ spectrum b, selection=not het
 
 ### 二级结构模式
 
-- **α-螺旋**：通常 RMSF 低（0.05-0.1 nm），非常刚性
-- **β-折叠**：低到中等 RMSF（0.05-0.15 nm），稳定
+- **α-螺旋 (α-helix)**：通常 RMSF 低（0.05-0.1 nm），非常刚性
+- **β-折叠 (β-sheet)**：低到中等 RMSF（0.05-0.15 nm），稳定
 - **环**：高 RMSF（0.15-0.3 nm），柔性
 - **转角**：中到高 RMSF（0.1-0.2 nm）
-- **N 端和 C 端**：非常高的 RMSF（0.2-0.5 nm），通常无序
+- **N 端和 C 端 (C-terminus)(N-terminus, C-terminus) (N-terminus, C-terminus)**：非常高的 RMSF（0.2-0.5 nm），通常无序
 
 ### 功能区域
 
@@ -384,3 +384,9 @@ S² ≈ 1 - (3/2) × (RMSF/R)²
 - Kabsch 和 Sander（1983）"Dictionary of protein secondary structure"
 - Smith 等人（1990）"Dynamics and conformational energetics of a protein"
 - Frauenfelder 等人（1991）"Energy landscapes and protein reactions"
+
+
+
+
+
+
