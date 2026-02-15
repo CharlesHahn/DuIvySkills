@@ -1,425 +1,253 @@
 ---
-name: gromacs
-description: "Comprehensive guide for GROMACS molecular dynamics simulation package. Use when Claude needs to execute GROMACS commands or understand GROMACS functionality for: (1) Setting up molecular dynamics simulations (topology generation, energy minimization, equilibration, production), (2) Analyzing simulation trajectories (RMSD, RMSF, hydrogen bonds, distances, clustering), (3) Processing trajectory files (format conversion, PBC correction, fitting), (4) Extracting and analyzing energy and thermodynamic data, (5) Creating index groups and selecting atoms, (6) Any GROMACS-related simulation or analysis tasks"
+name: gromacs-skills
+description: "Guide for GROMACS molecular dynamics simulation. Use when Claude needs to: (1) Set up MD simulations, (2) Analyze trajectories, (3) Process trajectory files, (4) Extract energy data, (5) Create index groups"
 ---
 
 # GROMACS
 
-GROMACS is a versatile package to perform molecular dynamics, i.e. simulate the Newtonian equations of motion for systems with hundreds to millions of particles. This skill provides command reference and workflow guidance for GROMACS simulations and analysis.
+> **重要：始终先查看本地帮助**
+>
+> GROMACS 版本差异可能导致参数不同。**务必**先运行 `gmx <command> -h` 获取该命令最准确的参数信息。
 
-## Quick Start
+GROMACS 是分子动力学模拟软件包，可模拟从几百到数百万粒子的系统。本技能提供 GROMACS 命令参考和工作流指南。
 
-### Check GROMACS Version
+## 快速入门
+
+### 检查版本
 
 ```bash
 gmx --version
 ```
 
-Note the version number for compatibility and documentation lookup.
+记录版本号以便查阅对应文档。
 
-### Get Command Help
+### 获取帮助
 
-**Priority 1: Local help (fastest, version-matched)**
+**优先级 1：本地帮助（最快、版本匹配）**
 ```bash
 gmx <command> -h
 ```
 
-**Priority 2: Online documentation (detailed, official)**
+**优先级 2：在线文档（详细、官方）**
 ```bash
-# Search with version number
+# 带版本号搜索
 web_search: "site:manual.gromacs.org gmx <command> <version>"
-# Example: "site:manual.gromacs.org gmx rms 2024.3"
+# 示例: "site:manual.gromacs.org gmx rms 2024.3"
 ```
 
-**Always use local help first** for detailed parameters and options.
+## 命令分类
 
-## Command Categories
+| 分类 | 主要命令 | 说明 |
+|------|----------|------|
+| **拓扑与结构** | `pdb2gmx`, `editconf`, `solvate`, `insert-molecules`, `genrestr` | 生成拓扑、定义盒子、添加溶剂 |
+| **模拟设置** | `grompp`, `mdrun` | 生成运行文件、执行模拟 |
+| **能量分析** | `energy`, `eneconv`, `bar` | 提取能量、自由能计算 |
+| **轨迹分析** | `rms`, `rmsf`, `gyrate`, `hbond`, `distance`, `angle`, `dihedral`, `cluster`, `mindist`, `sasa`, `principal`, `do_dssp` | RMSD/RMSF、氢键、距离、二级结构等 |
+| **结构分析** | `covar`, `anaeig`, `mdmat`, `sham`, `order`, `rotacf`, `dielectric` | PCA、距离矩阵、自由能景观 |
+| **轨迹处理** | `trjconv`, `trjcat`, `trjorder`, `dump` | 格式转换、PBC 修正、轨迹拼接 |
+| **索引与选择** | `make_ndx`, `select`, `genion` | 创建索引组、选择原子、添加离子 |
+| **工具** | `xpm2ps`, `x2top`, `check`, `wham`, `tune_pme` | 格式转换、检查文件、WHAM 分析 |
 
-### 1. Topology and Structure
+完整命令说明请参阅 [command-categories.md](references/command-categories.md)。
 
-| Command | Description |
-|---------|-------------|
-| `pdb2gmx` | Generate GROMACS topology from PDB structure |
-| `editconf` | Edit structure files (box definition, dimensions) |
-| `solvate` | Add solvent molecules to simulation box |
-| `insert-molecules` | Insert molecules into simulation box |
-| `genrestr` | Generate position restraint files |
+## 常用参数
 
-### 2. Simulation Setup
+### 输入输出
 
-| Command | Description |
-|---------|-------------|
-| `grompp` | Generate simulation run input file (.tpr) from topology and parameters |
-| `mdrun` | Run molecular dynamics simulation |
-| `mdrun-mpi` | Run simulation with MPI parallelization |
+| 参数 | 说明 |
+|------|------|
+| `-f INPUT` | 输入轨迹/结构文件 |
+| `-s TOPOLOGY` | 输入拓扑文件（.tpr） |
+| `-n INDEX` | 输入索引文件（.ndx） |
+| `-o OUTPUT` | 输出文件 |
+| `-deffnm BASENAME` | 默认文件名前缀 |
 
-### 3. Energy Analysis
+### 时间选择
 
-| Command | Description |
-|---------|-------------|
-| `energy` | Extract energy components from energy file |
-| `eneconv` | Convert energy file formats |
-| `bar` | Free energy calculations using Bennett acceptance ratio |
+| 参数 | 说明 |
+|------|------|
+| `-b TIME` | 起始时间（ps） |
+| `-e TIME` | 结束时间（ps） |
+| `-dt TIME` | 时间步长（ps） |
 
-### 4. Trajectory Analysis
+### 轨迹处理
 
-| Command | Description |
-|---------|-------------|
-| `rms` | Calculate root mean square deviation (RMSD) |
-| `rmsf` | Calculate root mean square fluctuation (RMSF) |
-| `gyrate` | Calculate radius of gyration |
-| `hbond` | Analyze hydrogen bonds |
-| `distance` | Calculate distances between atom groups |
-| `angle` | Calculate angles between atom groups |
-| `dihedral` | Calculate dihedral angles |
-| `cluster` | Cluster analysis of conformations |
-| `mindist` | Calculate minimum distance between groups |
-| `sasa` | Calculate solvent accessible surface area |
-| `principal` | Principal component analysis of molecules |
-| `do_dssp` | Secondary structure analysis (DSSP) |
+| 参数 | 说明 |
+|------|------|
+| `-pbc TYPE` | PBC 处理（none, mol, atom, com, nojump） |
+| `-center` | 居中坐标 |
+| `-fit TYPE` | 拟合轨迹（none, rot+trans 等） |
 
-### 5. Structural Analysis
+### 性能参数
 
-| Command | Description |
-|---------|-------------|
-| `covar` | Covariance matrix analysis (for PCA) |
-| `anaeig` | Analyze eigenvectors from covariance analysis |
-| `mdmat` | Calculate distance matrix between residues |
-| `sham` | Generate free energy landscapes |
-| `order` | Calculate order parameters |
-| `rotacf` | Calculate rotational autocorrelation functions |
-| `dielectric` | Calculate dielectric properties |
+| 参数 | 说明 |
+|------|------|
+| `-nt NUMBER` | 线程数 |
+| `-ntomp NUMBER` | OpenMP 线程数 |
+| `-nb TYPE` | 邻居搜索（cpu, gpu） |
 
-### 6. Trajectory Processing
+完整参数说明请参阅 [common-parameters.md](references/common-parameters.md)。
 
-| Command | Description |
-|---------|-------------|
-| `trjconv` | Convert trajectory formats, apply PBC correction, fit structures |
-| `trjcat` | Concatenate multiple trajectory files |
-| `trjorder` | Reorder atoms in trajectory |
-| `dump` | Dump trajectory to text format |
-| `eneconv` | Convert energy file formats |
+## 如何使用 GROMACS 命令
 
-### 7. Index and Selection
-
-| Command | Description |
-|---------|-------------|
-| `make_ndx` | Create or edit index files |
-| `select` | Select atoms using selection language |
-| `genrestr` | Generate position restraints |
-| `genion` | Replace water molecules with ions |
-
-### 8. Tools and Utilities
-
-| Command | Description |
-|---------|-------------|
-| `xpm2ps` | Convert XPM matrix files to PostScript |
-| `x2top` | Generate topology from coordinates |
-| `check` | Check simulation files for errors |
-| `wham` | Weighted histogram analysis method |
-| `tune_pme` | Tune PME parameters for performance |
-
-## Common Parameters
-
-### Input/Output Files
-
-- `-f INPUT`: Input trajectory/coordinate file
-- `-s TOPOLOGY`: Input topology file (.tpr)
-- `-n INDEX`: Input index file (.ndx)
-- `-c INPUT`: Input structure file
-- `-o OUTPUT`: Output file
-- `-p TOPOL`: Output topology file
-
-### Time Selection
-
-- `-b TIME`: Start time (ps)
-- `-e TIME`: End time (ps)
-- `-dt TIME`: Time step for output (ps)
-
-### Trajectory Processing
-
-- `-pbc TYPE`: Periodic boundary condition handling (none, mol, atom, com, nojump, cluster)
-- `-center TYPE`: Center coordinates
-- `-fit TYPE`: Fit trajectory (none, xyz, rotxy, xy, progression, transxy, rot+trans)
-- `-ur TYPE`: Unit cell representation (compact, triclinic, rect)
-
-### Analysis Options
-
-- `-type TYPE`: Calculation type
-- `-ng NUMBER`: Number of groups
-- `-frame FRAME`: Specific frame number
-
-### Output Control
-
-- `-nice LEVEL`: Nice level for CPU usage
-- `-nt NUMBER`: Number of threads
-| `-ntmpi NUMBER`: Number of MPI threads
-| `-mpi`: Enable MPI
-| `-nb TYPE`: Neighbor searching type (cpu, gpu)
-
-### Visualization
-
-- `-xvg TYPE`: Plot format (none, xmgrace, xmgr, matplotlib)
-| `-xvg FORMAT`: XVG format (none, xmgrace, xmgr, matplotlib)
-
-## Version Detection
-
-### Get Version Information
+**核心原则：始终先查看本地帮助**
 
 ```bash
-gmx --version
-```
-
-Example output:
-```
-GROMACS version:    2024.3
-GROMACS modification: 2024.3-1
-Precision: mixed
-MPI: enabled
-OpenMP: enabled
-GPU support: enabled
-FFT library: fftw-MPI
-```
-
-### Check for Specific Features
-
-```bash
-# Check for GPU support
-gmx mdrun -h | grep -i gpu
-
-# Check for MPI support
-gmx --version | grep -i mpi
-
-# Check for OpenMP support
-gmx --version | grep -i openmp
-```
-
-## Getting Help
-
-### Method 1: Local Help (Recommended)
-
-Get help for any command:
-
-```bash
+# 查看命令帮助
 gmx <command> -h
-```
 
-Example:
-```bash
+# 示例
 gmx rms -h
-gmx mdrun -h
-gmx pdb2gmx -h
+gmx trjconv -h
+gmx energy -h
 ```
 
-**When to use local help**:
-- User has GROMACS installed
-- Need version-specific parameters
-- Quick parameter lookup
-- Offline work
+本地帮助提供：
+- 完整参数列表
+- 默认值说明
+- 输入/输出文件要求
+- 使用示例
 
-### Method 2: Online Documentation
-
-Search GROMACS official manual:
+**在线文档查询**（本地帮助不够时）：
 
 ```bash
-# General search
-web_search: "site:manual.gromacs.org gmx <command>"
-
-# Version-specific search
+# 带版本号搜索官方文档
 web_search: "site:manual.gromacs.org gmx <command> <version>"
-
-# Examples
-web_search: "site:manual.gromacs.org gmx rms 2024.3"
-web_search: "site:manual.gromacs.org gmx mdrun 2023"
-web_search: "site:manual.gromacs.org gmx pdb2gmx current"
+# 示例: "site:manual.gromacs.org gmx rms 2024.3"
 ```
 
-**When to use online search**:
-- User doesn't have GROMACS installed
-- Need detailed explanations and examples
-- Need to compare parameters across versions
-- Troubleshooting specific issues
+## 文件格式
 
-### Help Workflow
+### 输入格式
 
-1. **User requests GROMACS task**
-2. **Check GROMACS version**: `gmx --version`
-3. **Get basic info** from this skill's command categories
-4. **Get detailed parameters**: `gmx <command> -h`
-5. **If more detail needed**: Search online documentation with version
+| 格式 | 说明 |
+|------|------|
+| `.pdb` | Protein Data Bank 格式 |
+| `.gro` | GROMACS 坐标格式 |
+| `.tpr` | GROMACS 运行输入文件（拓扑+参数） |
+| `.xtc` | 压缩轨迹（有损，适合长模拟） |
+| `.trr` | 全精度轨迹 |
+| `.ndx` | 索引文件（原子组） |
+| `.mdp` | 分子动力学参数文件 |
+| `.top` | 拓扑文件 |
 
-## Common Workflows
+### 输出格式
 
-### 1. Basic Simulation Setup
+| 格式 | 说明 |
+|------|------|
+| `.xvg` | Grace/XVG 图表格式（时间序列数据） |
+| `.xpm` | 像素图格式（矩阵、热图） |
+| `.edr` | 能量文件（二进制） |
+| `.log` | 日志文件 |
+| `.cpt` | 检查点文件（用于续算） |
 
-```
-pdb2gmx → editconf → solvate → genion → grompp → mdrun
-```
+## 版本兼容性
 
-### 2. Energy Minimization
+不同 GROMACS 版本可能有参数差异：
 
-```
-grompp (emin.mdp) → mdrun → energy
-```
+- `.tpr` 文件**不兼容**不同主版本
+- 升级版本后需重新生成 `.tpr` 文件
+- 始终检查 `.mdp` 参数是否有效
+- 版本差异请查询官方文档：`site:manual.gromacs.org <version>`
 
-### 3. Equilibration (NVT/NPT)
+## 与 DuIvyTools 配合
 
-```
-grompp (nvt.mdp) → mdrun → energy
-grompp (npt.mdp) → mdrun → energy
-```
+GROMACS 输出文件可使用 DuIvyTools 可视化：
 
-### 4. Production Run
+- **.xvg 文件**：RMSD、RMSF、能量、氢键等时间序列数据
+- **.xpm 文件**：DCCM、FEL、DSSP 等矩阵数据
 
-```
-grompp (md.mdp) → mdrun → analysis
-```
+使用 `duivytools-skills` 技能进行可视化：
 
-### 5. Trajectory Analysis
-
-```
-trjconv (PBC correction) → rms/rmsf/gyrate/hbond → visualization with DuIvyTools
-```
-
-### 6. PCA Analysis
-
-```
-trjconv (fit) → covar → anaeig → visualization with DuIvyTools
-```
-
-**Note**: Use `duivytools-skills` skill for visualizing all GROMACS output files (.xvg, .xpm)
-
-## File Formats
-
-### Input Formats
-
-- **.pdb**: Protein Data Bank format
-- **.gro**: GROMACS coordinate format
-- **.tpr**: GROMACS portable run input (topology + parameters)
-- **.xtc**: Compressed trajectory (lossy, good for long simulations)
-- **.trr**: Full precision trajectory
-- **.ndx**: Index file (atom groups)
-- **.mdp**: Molecular dynamics parameter file
-- **.top**: Topology file
-
-### Output Formats
-
-- **.xvg**: Grace/XVG plot format (ASCII) - Time-series data, energies, analysis results
-- **.xpm**: Pixel map format (matrices, heatmaps) - 2D matrices for correlation, contact maps, free energy landscapes
-- **.edr**: Energy file (binary)
-- **.log**: Log file
-- **.cpt**: Checkpoint file (for continuation)
-
-### Visualization of GROMACS Output Files
-
-**For visualization of GROMACS output files (.xvg, .xpm, etc.), use DuIvyTools:**
-
-Call the `duivytools-skills` skill when you need to:
-- **Visualize .xvg files**: Plot RMSD, RMSF, energies, hydrogen bonds, distances, angles, PC projections, etc.
-- **Visualize .xpm files**: Display matrices, heatmaps (DCCM, distance contact maps, free energy landscapes, secondary structure)
-- **Analyze data**: Calculate averages, distributions, correlations from XVG files
-- **Generate publication-quality plots**: Create professional figures with customizable styles
-
-**Common visualization examples**:
 ```bash
-# Visualize XVG data (RMSD, RMSF, energy, etc.)
+# 可视化 RMSD
 dit xvg_show -f rmsd.xvg -x "Time (ns)" -y "RMSD (nm)"
 
-# Visualize XPM matrix (DCCM, FEL, etc.)
-dit xpm_show -f dccm.xpm -m contour -cmap bwr -zmin -1 -zmax 1
+# 可视化 DCCM
+dit xpm_show -f dccm.xpm -cmap coolwarm -zmin -1 -zmax 1
 
-# Compare multiple XVG files
-dit xvg_compare -f rmsd1.xvg rmsd2.xvg -c 1 1 -l "Run1" "Run2"
+# 可视化自由能景观
+dit xpm_show -f fel.xpm -m 3d -eg plotly
 ```
 
-**When to use DuIvyTools**:
-- After any GROMACS analysis that produces .xvg or .xpm files
-- When user requests visualization or plots
-- For publication-quality figures with customizable styling
-- For statistical analysis of GROMACS output data
+## 性能优化
 
-## Performance Optimization
-
-### Parallel Execution
+### 并行执行
 
 ```bash
-# OpenMP (multithreading)
+# OpenMP（多线程）
 gmx mdrun -nt 4 -s topol.tpr -deffnm md
 
-# MPI (multinode)
+# MPI（多节点）
 mpirun -np 4 gmx_mpi mdrun -s topol.tpr -deffnm md
 
-# Hybrid MPI+OpenMP
-mpirun -np 2 gmx_mpi mdrun -nt 2 -s topol.tpr -deffnm md
+# 混合 MPI+OpenMP
+mpirun -np 2 gmx_mpi mdrun -ntomp 2 -s topol.tpr -deffnm md
 ```
 
-### GPU Acceleration
+### GPU 加速
 
 ```bash
-# GPU for non-bonded interactions
+# GPU 用于非键相互作用
 gmx mdrun -ntomp 4 -nb gpu -s topol.tpr -deffnm md
 
-# GPU for update
+# GPU 用于更新
 gmx mdrun -ntomp 4 -nb gpu -update gpu -s topol.tpr -deffnm md
 ```
 
-### Memory Optimization
+## 常见问题
 
-```bash
-# Verlet buffer tuning
-gmx mdrun -ntomp 4 -nb gpu -tunepme -s topol.tpr -deffnm md
-```
+**"Fatal error: No such group"**：索引组未找到
+- 解决方案：使用 `make_ndx` 创建正确的索引文件
 
-## Troubleshooting
+**"Fatal error: Domain decomposition error"**：并行设置问题
+- 解决方案：调整 MPI 进程数或域分解参数
 
-### Common Issues
+**"Fatal error: Number of coordinates does not match topology"**：文件不匹配
+- 解决方案：重新生成拓扑或坐标文件
 
-**"Fatal error: No such group"**: Index group not found
-- Solution: Create proper index file with `make_ndx`
+## 最佳实践
 
-**"Back Off! I just backed up md.log"**: Simulation crashed
-- Solution: Check energy conservation, timestep, constraints
+- 使用前**检查版本**
+- **优先使用本地帮助**获取准确参数
+- 大模拟前**先在小系统测试**
+- 生产运行时**监控能量守恒**
+- 修改前**备份文件**
+- **记录所有参数**以便复现
+- 使用 DuIvyTools 进行**可视化分析**
 
-**"Fatal error: Domain decomposition error"**: Parallel setup issue
-- Solution: Adjust MPI ranks or domain decomposition parameters
+## 重要安全提示
 
-**"Fatal error: Number of coordinates in coordinate file does not match topology"**: Mismatched files
-- Solution: Regenerate topology or coordinate file
+> **Production Run（生产运行）**
+>
+> Agent **不应主动执行** `mdrun` 生产运行。正确的做法是：
+> - 生成运行脚本（如 `run.sh`）供用户执行
+> - 脚本应包含完整的运行命令和参数
+> - 让用户在合适的计算环境中自行运行
+>
+> 示例脚本：
+> ```bash
+> #!/bin/bash
+> # run_md.sh - 生产运行脚本
+> gmx mdrun -s md.tpr -deffnm md -ntomp 4 -nb gpu
+> ```
+>
+> Agent 可以执行的操作：
+> - ✅ 能量最小化（短时间）
+> - ✅ NVT/NPT 平衡（短时间）
+> - ✅ 分析命令（rms, rmsf, hbond 等）
+> - ✅ 轨迹处理（trjconv）
+> - ❌ 长时间生产运行（应由用户执行）
 
-## Best Practices
+## 参考文档
 
-- **Always check version** before using commands
-- **Use local help first** for accurate parameters
-- **Test on small systems** before large simulations
-- **Monitor energy conservation** during production runs
-- **Back up files** before modifications
-- **Document all parameters** and settings
-- **Validate results** with multiple analysis methods
-- **Use appropriate output frequency** to balance performance and detail
-- **Visualize results** using DuIvyTools for publication-quality figures
-- **Check output files** (.xvg, .xpm) after each analysis step
+- **[command-categories.md](references/command-categories.md)** - 完整命令列表和说明
+- **[common-parameters.md](references/common-parameters.md)** - 常用参数详解
 
-## Reference Documentation
+## 相关资源
 
-For detailed information, consult these references:
-
-- **[Command Categories](references/command-categories.md)** - Complete list of GROMACS commands by category
-- **[Common Parameters](references/common-parameters.md)** - Detailed explanation of frequently used parameters
-- **[Version Compatibility](references/version-compatibility.md)** - Version differences and migration guide
-- **[Workflow Examples](references/workflow-examples.md)** - Common simulation workflows with examples
-
-## Additional Resources
-
-- **Official Documentation**: https://manual.gromacs.org/
-- **GitHub Repository**: https://github.com/gromacs/gromacs
-- **User Forum**: https://gromacs.bioexcel.eu/
-- **Tutorials**: http://www.mdtutorials.com/gmx/
-- **Citation**: Abraham et al., "GROMACS: High performance molecular simulations through multi-level parallelism from laptops to supercomputers", SoftwareX 1-2, 19-25 (2015)
-
-## Important Notes
-
-- **Version matters**: Commands and parameters can vary between GROMACS versions
-- **Always check help**: Run `gmx <command> -h` for accurate parameter information
-- **Context awareness**: This skill provides overview and workflow guidance; detailed parameters should be obtained via local help or online documentation
-- **Performance tuning**: Optimize parameters for your hardware and system size
-- **Validation**: Always validate simulation results with appropriate analysis
+- 官方文档: https://manual.gromacs.org/
+- GitHub: https://github.com/gromacs/gromacs
+- 用户论坛: https://gromacs.bioexcel.eu/
+- 教程: http://www.mdtutorials.com/gmx/
+- 引用: Abraham et al., SoftwareX 1-2, 19-25 (2015)

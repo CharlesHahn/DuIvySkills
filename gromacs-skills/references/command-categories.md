@@ -1,726 +1,730 @@
-# GROMACS Command Categories
+# GROMACS 命令分类
 
-This document provides a comprehensive list of GROMACS commands organized by functional category.
+本文档按功能分类列出 GROMACS 命令。
 
-## 1. Topology and Structure
+> **重要**：不同版本参数可能有差异。始终使用 `gmx <command> -h` 查看准确参数。
+
+## 目录
+
+- [1. 拓扑与结构](#1-拓扑与结构)
+- [2. 模拟设置](#2-模拟设置)
+- [3. 能量分析](#3-能量分析)
+- [4. 轨迹分析](#4-轨迹分析)
+- [5. 结构分析](#5-结构分析)
+- [6. 轨迹处理](#6-轨迹处理)
+- [7. 索引与选择](#7-索引与选择)
+- [8. 工具与实用程序](#8-工具与实用程序)
+
+---
+
+## 1. 拓扑与结构
 
 ### `pdb2gmx`
-Generate GROMACS topology from PDB structure.
+从 PDB 结构生成 GROMACS 拓扑。
 
-**Purpose**: Convert PDB files to GROMACS topology and coordinate files.
+**用途**：将 PDB 文件转换为 GROMACS 拓扑和坐标文件。
 
-**Key parameters**:
-- `-f INPUT`: Input PDB file
-- `-o OUTPUT`: Output GROMACS coordinate file
-- `-p OUTPUT`: Output topology file
-- `-i OUTPUT`: Output position restraint file
-- `-ff FORCEFIELD`: Force field selection
-- `-water WATERMODEL`: Water model selection
-- `-ignh`: Ignore hydrogen atoms in PDB
-- `-merge`: Merge non-interactive atoms
-- `-chainsepitp`: Generate separate chain identifiers
+**常用参数**：
+- `-f INPUT`：输入 PDB 文件
+- `-o OUTPUT`：输出 GROMACS 坐标文件
+- `-p OUTPUT`：输出拓扑文件
+- `-i OUTPUT`：输出位置限制文件
+- `-ff STRING`：力场选择
+- `-water ENUM`：水模型（none, spc, spce, tip3p, tip4p, tip5p）
+- `-[no]ignh`：忽略 PDB 中的氢原子
+- `-merge ENUM`：合并多条链（no, all, interactive）
+- `-chainsep ENUM`：链分隔方式（id_or_ter, id_and_ter, ter, id, interactive）
 
-**Common workflows**:
-- Basic: `pdb2gmx -f protein.pdb -o protein.gro -p topol.top`
-- With water: `pdb2gmx -f protein.pdb -o protein.gro -p topol.top -water tip3p`
+**示例**：
+```bash
+gmx pdb2gmx -f protein.pdb -o protein.gro -p topol.top -water tip3p
+```
 
 ### `editconf`
-Edit structure files (box definition, dimensions).
+编辑结构文件（盒子定义、尺寸）。
 
-**Purpose**: Define simulation box, modify box dimensions, center molecules.
+**用途**：定义模拟盒子、修改盒子尺寸、居中分子。
 
-**Key parameters**:
-- `-f INPUT`: Input structure file
-- `-o OUTPUT`: Output structure file
-- `-bt TYPE`: Box type (cubic, dodecahedron, octahedron, triclinic)
-- `-d DISTANCE`: Distance between molecule and box edges
-- `-c CENTER`: Center coordinates
-- `-center`: Center molecule in box
-- `-box SIZE`: Box dimensions (x y z)
-- `-angles ANGLES`: Box angles (for triclinic)
+**常用参数**：
+- `-f INPUT`：输入结构文件
+- `-o OUTPUT`：输出结构文件
+- `-bt ENUM`：盒子类型（triclinic, cubic, dodecahedron, octahedron）
+- `-d REAL`：分子与盒子边缘的距离
+- `-[no]c`：在盒子中居中
+- `-center VECTOR`：将几何中心移到指定位置
+- `-box VECTOR`：盒子尺寸
+- `-angles VECTOR`：盒子角度（三斜）
 
-**Common workflows**:
-- Define cubic box: `editconf -f protein.gro -o protein_box.gro -bt cubic -d 1.0`
-- Center molecule: `editconf -f protein.gro -o protein_centered.gro -center`
+**示例**：
+```bash
+gmx editconf -f protein.gro -o protein_box.gro -bt cubic -d 1.0 -c
+gmx editconf -f protein.gro -o protein_dod.gro -bt dodecahedron -d 1.0 -c
+```
 
 ### `solvate`
-Add solvent molecules to simulation box.
+向模拟盒子添加溶剂分子。
 
-**Purpose**: Solvate simulation system with water molecules.
+**用途**：用溶剂分子填充模拟系统。
 
-**Key parameters**:
-- `-cp INPUT`: Input structure (protein in box)
-- `-cs INPUT`: Solvent structure (e.g., spc216.gro)
-- `-o OUTPUT`: Output solvated structure
-- `-p TOPOLOGY`: Output topology file
+**常用参数**：
+- `-cp INPUT`：输入结构（盒子中的蛋白质）
+- `-cs INPUT`：溶剂结构（如 spc216.gro）
+- `-o OUTPUT`：输出溶剂化结构
+- `-p TOPOLOGY`：输出拓扑文件
 
-**Common workflows**:
-- Basic solvation: `solvate -cp protein_box.gro -cs spc216.gro -o protein_solv.gro -p topol.top`
+**示例**：
+```bash
+gmx solvate -cp protein_box.gro -cs spc216.gro -o protein_solv.gro -p topol.top
+```
 
 ### `insert-molecules`
-Insert molecules into simulation box.
+向模拟盒子插入分子。
 
-**Purpose**: Insert multiple copies of molecules into simulation box.
+**用途**：向模拟盒子插入多个分子的副本。
 
-**Key parameters**:
-- `-f INPUT`: Input structure
-- `-ci INPUT`: Insert structure
-| `-nmol NUMBER`: Number of molecules to insert
-| `-o OUTPUT`: Output structure
-| `-radius DISTANCE`: Minimum distance between molecules
+**常用参数**：
+- `-f INPUT`：输入结构
+- `-ci INPUT`：要插入的结构
+- `-nmol INT`：插入分子数量
+- `-o OUTPUT`：输出结构
+- `-radius REAL`：分子间最小距离
 
-**Common workflows**:
-- Insert ions: `insert-molecules -f protein_solv.gro -ci ions.gro -nmol 10 -o protein_ions.gro`
+**示例**：
+```bash
+gmx insert-molecules -f protein_solv.gro -ci ligand.gro -nmol 10 -o protein_lig.gro
+```
 
 ### `genrestr`
-Generate position restraint files.
+生成位置限制文件。
 
-**Purpose**: Create position restraint files for equilibration.
+**用途**：为平衡阶段创建位置限制文件。
 
-**Key parameters**:
-- `-f INPUT`: Input structure
-- `-o OUTPUT`: Output position restraint file
-- `-i INPUT`: Index file with restrained atoms
-| `-fc NUMBER`: Force constant
+**常用参数**：
+- `-f INPUT`：输入结构
+- `-o OUTPUT`：输出位置限制文件
+- `-i INPUT`：索引文件
+- `-fc REAL REAL REAL`：力常数（x, y, z 方向）
 
-**Common workflows**:
-- Restrain protein: `genrestr -f protein.gro -o posre.itp -f index.ndx -fc 1000`
+**示例**：
+```bash
+echo "Protein-H" | gmx genrestr -f protein.gro -o posre.itp -fc 1000 1000 1000
+```
 
-## 2. Simulation Setup
+---
+
+## 2. 模拟设置
 
 ### `grompp`
-Generate simulation run input file (.tpr) from topology and parameters.
+从拓扑和参数生成模拟运行输入文件（.tpr）。
 
-**Purpose**: Compile topology, parameters, and simulation conditions into .tpr file.
+**用途**：编译拓扑、参数和模拟条件到 .tpr 文件。
 
-**Key parameters**:
-- `-f INPUT`: Input parameter file (.mdp)
-- `-c INPUT`: Input structure file
-- `-p INPUT`: Input topology file
-| `-o OUTPUT`: Output .tpr file
-| `-t INPUT`: Input trajectory (for restart)
-| `-e INPUT`: Energy file (for restart)
-| `-r INPUT`: Reference structure for fitting
-| `-n INPUT`: Index file
-| `-po OUTPUT`: Processed topology
-| `-maxwarn NUMBER`: Maximum number of warnings to ignore
+**常用参数**：
+- `-f INPUT`：输入参数文件（.mdp）
+- `-c INPUT`：输入结构文件
+- `-p INPUT`：输入拓扑文件
+- `-o OUTPUT`：输出 .tpr 文件
+- `-r INPUT`：参考结构（用于位置限制）
+- `-n INPUT`：索引文件
+- `-t INPUT`：输入轨迹（用于重启）
+- `-e INPUT`：能量文件（用于重启）
+- `-po OUTPUT`：输出处理后的 .mdp 文件
+- `-maxwarn INT`：最大警告忽略数
 
-**Common workflows**:
-- Basic: `grompp -f mdp/minim.mdp -c ions.gro -p topol.top -o em.tpr`
-- With index: `grompp -f mdp/nvt.mdp -c npt.gro -p topol.top -n index.ndx -o nvt.tpr`
-- Continue: `grompp -f mdp/md.mdp -c md.cpt -t md.cpt -p topol.top -o md.tpr -n index.ndx`
+**示例**：
+```bash
+gmx grompp -f minim.mdp -c ions.gro -p topol.top -o em.tpr
+gmx grompp -f nvt.mdp -c em.gro -r em.gro -p topol.top -o nvt.tpr
+```
 
 ### `mdrun`
-Run molecular dynamics simulation.
+运行分子动力学模拟。
 
-**Purpose**: Execute molecular dynamics simulation.
+**用途**：执行分子动力学模拟。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-deffnm BASENAME`: Default filename base
-| `-o OUTPUT`: Output trajectory
-| `-x OUTPUT`: Compressed trajectory
-| `-c OUTPUT`: Final coordinates
-| `-e OUTPUT`: Output energy file
-| `-g OUTPUT`: Output log file
-| `-cpt NUMBER`: Checkpoint interval (minutes)
-| `-nt NUMBER`: Number of threads
-| `-ntmpi NUMBER`: Number of MPI threads
-| `-nb TYPE`: Neighbor searching (cpu, gpu)
-| `-update TYPE`: Update method (cpu, gpu)
-| `-pme TYPE`: PME method (cpu, gpu)
-| `-bonded TYPE`: Bonded interactions (cpu, gpu)
-| `-ntomp NUMBER`: OpenMP threads per MPI rank
-| `-tunepme`: Tune PME parameters
-| `-resethway`: Reset hardware interactions
-| `-gpu_id ID`: GPU device ID
-| `-nsteps NUMBER**: Override number of steps
-| `-replex NUMBER**: Number of replica exchange steps
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-deffnm STRING`：默认文件名前缀
+- `-o OUTPUT`：输出轨迹
+- `-x OUTPUT`：压缩轨迹
+- `-c OUTPUT`：最终坐标
+- `-e OUTPUT`：输出能量文件
+- `-g OUTPUT`：输出日志文件
+- `-cpt REAL`：检查点间隔（分钟）
+- `-nt INT`：总线程数
+- `-ntmpi INT`：线程 MPI 进程数
+- `-ntomp INT`：每个 MPI 进程的 OpenMP 线程数
+- `-nb ENUM`：非键相互作用位置（auto, cpu, gpu）
+- `-pme ENUM`：PME 计算位置（auto, cpu, gpu）
+- `-update ENUM`：更新和约束位置（auto, cpu, gpu）
+- `-[no]tunepme`：优化 PME 负载（默认 yes）
+- `-gpu_id STRING`：GPU 设备 ID 列表
+- `-nsteps INT`：覆盖步数
+- `-replex INT`：副本交换周期（步数）
 
-**Common workflows**:
-- Basic: `mdrun -s em.tpr -deffnm em`
-- Multi-threaded: `mdrun -s md.tpr -deffnm md -nt 4`
-- GPU: `mdrun -s md.tpr -deffnm md -ntomp 4 -nb gpu`
-- MPI: `mpirun -np 4 gmx_mpi mdrun -s md.tpr -deffnm md`
+**示例**：
+```bash
+gmx mdrun -s em.tpr -deffnm em
+gmx mdrun -s md.tpr -deffnm md -ntomp 4 -nb gpu
+mpirun -np 4 gmx_mpi mdrun -s md.tpr -deffnm md
+```
 
-### `mdrun-mpi`
-Run simulation with MPI parallelization.
+---
 
-**Purpose**: MPI-optimized version of mdrun for multi-node execution.
-
-**Key parameters**: Same as `mdrun`, with additional MPI-specific options.
-
-**Common workflows**:
-- Basic MPI: `mpirun -np 4 gmx_mpi mdrun -s md.tpr -deffnm md`
-- Hybrid MPI+OpenMP: `mpirun -np 2 gmx_mpi mdrun -ntomp 2 -s md.tpr -deffnm md`
-
-## 3. Energy Analysis
+## 3. 能量分析
 
 ### `energy`
-Extract energy components from energy file.
+从能量文件提取能量组分。
 
-**Purpose**: Extract and analyze energy terms from .edr file.
+**用途**：从 .edr 文件提取和分析能量项。
 
-**Key parameters**:
-- `-f INPUT`: Input energy file
-| `-o OUTPUT`: Output XVG file
-| `-dp`: Remove drift from energy
-| `-ee`: Estimate error (requires multiple energies)
-| `-b TIME`: Start time
-| `-e TIME`: End time
+**常用参数**：
+- `-f INPUT`：输入能量文件
+- `-o OUTPUT`：输出 XVG 文件
+- `-b TIME`：起始时间
+- `-e TIME`：结束时间
 
-**Common workflows**:
-- Extract potential energy: `echo "Potential" | gmx energy -f md.edr -o potential.xvg`
-- Extract temperature: `echo "Temperature" | gmx energy -f npt.edr -o temp.xvg`
-- Extract pressure: `echo "Pressure" | gmx energy -f npt.edr -o press.xvg`
+**示例**：
+```bash
+echo "Potential" | gmx energy -f md.edr -o potential.xvg
+echo "Temperature" | gmx energy -f npt.edr -o temp.xvg
+echo "Pressure" | gmx energy -f npt.edr -o press.xvg
+```
 
 ### `eneconv`
-Convert energy file formats.
+转换能量文件格式。
 
-**Purpose**: Convert between different energy file formats.
+**用途**：合并或转换能量文件。
 
-**Key parameters**:
-- `-f INPUT`: Input energy file
-| `-o OUTPUT`: Output energy file
+**常用参数**：
+- `-f INPUT`：输入能量文件
+- `-o OUTPUT`：输出能量文件
 
-**Common workflows**:
-- Basic: `eneconv -f md.edr -o md_new.edr`
+**示例**：
+```bash
+gmx eneconv -f part1.edr part2.edr -o combined.edr
+```
 
 ### `bar`
-Free energy calculations using Bennett acceptance ratio.
+使用 Bennett 接受比率计算自由能。
 
-**Purpose**: Calculate free energy differences from thermodynamic integration.
+**用途**：从热力学积分计算自由能差。
 
-**Key parameters**:
-| `-f INPUT`: Input energy files
-| `-o OUTPUT`: Output XVG file
-| `-i INPUT`: Input lambda values
+**常用参数**：
+- `-f INPUT`：输入能量文件
+- `-o OUTPUT`：输出 XVG 文件
 
-**Common workflows**:
-- Basic BAR: `gmx bar -f lambda0.edr lambda1.edr -o dg.xvg`
+**示例**：
+```bash
+gmx bar -f lambda0.edr lambda1.edr -o dg.xvg
+```
 
-## 4. Trajectory Analysis
+---
+
+## 4. 轨迹分析
 
 ### `rms`
-Calculate root mean square deviation (RMSD).
+计算均方根偏差（RMSD）。
 
-**Purpose**: Calculate RMSD of structures relative to reference.
+**用途**：计算相对于参考结构的 RMSD。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-o OUTPUT`: Output XVG file
-| `-n INPUT`: Index file
-| `-type TYPE`: Calculation type (fit, nofit)
-| `-pbc TYPE`: PBC handling
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-o OUTPUT`：输出 XVG 文件
+- `-n INPUT`：索引文件
 
-**Common workflows**:
-- RMSD to initial structure: `echo "Backbone\nProtein" | gmx rms -s md.tpr -f md.xtc -o rmsd.xvg`
-- RMSD to average: `echo "Backbone\nProtein" | gmx rms -s md.tpr -f md.xtc -o rmsd_avg.xvg -ref average.pdb`
+**示例**：
+```bash
+echo "Backbone\nProtein" | gmx rms -s md.tpr -f md.xtc -o rmsd.xvg
+```
 
 ### `rmsf`
-Calculate root mean square fluctuation (RMSF).
+计算均方根涨落（RMSF）。
 
-**Purpose**: Calculate per-atom RMSF.
+**用途**：计算每个原子的 RMSF。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-o OUTPUT`: Output XVG file
-| `-n INPUT`: Index file
-| `-res`: Output per-residue
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-o OUTPUT`：输出 XVG 文件
+- `-n INPUT`：索引文件
+- `-[no]res`：按残基输出
 
-**Common workflows**:
-- Per-atom RMSF: `echo "Backbone" | gmx rmsf -s md.tpr -f md.xtc -o rmsf.xvg`
-- Per-residue RMSF: `echo "Backbone" | gmx rmsf -s md.tpr -f md.xtc -o rmsf_res.xvg -res`
+**示例**：
+```bash
+echo "C-alpha" | gmx rmsf -s md.tpr -f md.xtc -o rmsf.xvg -res
+```
 
 ### `gyrate`
-Calculate radius of gyration.
+计算回转半径。
 
-**Purpose**: Calculate radius of gyration and components.
+**用途**：计算回转半径及其分量。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-o OUTPUT`: Output XVG file
-| `-n INPUT`: Index file
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-o OUTPUT`：输出 XVG 文件
+- `-n INPUT`：索引文件
 
-**Common workflows**:
-- Basic: `echo "Protein" | gmx gyrate -s md.tpr -f md.xtc -o rg.xvg`
+**示例**：
+```bash
+echo "Protein" | gmx gyrate -s md.tpr -f md.xtc -o rg.xvg
+```
 
 ### `hbond`
-Analyze hydrogen bonds.
+分析氢键。
 
-**Purpose**: Calculate and analyze hydrogen bonds.
+**用途**：计算和分析氢键（GROMACS 2024 新版）。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-num OUTPUT`: Output hydrogen bond count
-| `-dist OUTPUT`: Output hydrogen bond distances
-| `-ang OUTPUT`: Output hydrogen bond angles
-| `-hbn OUTPUT`: Output hydrogen bond list
-| `-hbm OUTPUT`: Output hydrogen bond matrix
-| `-n INPUT`: Index file
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-num OUTPUT`：输出氢键数量
+- `-dist OUTPUT`：输出氢键距离分布
+- `-ang OUTPUT`：输出氢键角度分布
+- `-r SELECTION`：参考选择
+- `-t SELECTION`：目标选择
 
-**Common workflows**:
-- Count hydrogen bonds: `echo "Protein\nProtein" | gmx hbond -s md.tpr -f md.xtc -num hb.xvg`
-- Distance analysis: `echo "Protein\nProtein" | gmx hbond -s md.tpr -f md.xtc -dist hb_dist.xvg`
+**示例**：
+```bash
+gmx hbond -s md.tpr -f md.xtc -r "protein" -t "protein" -num hb.xvg
+```
 
 ### `distance`
-Calculate distances between atom groups.
+计算原子组间距离。
 
-**Purpose**: Calculate distance between two atom groups over time.
+**用途**：计算两组原子间的距离随时间变化。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-n INPUT`: Index file
-| `-oall OUTPUT`: Output all distances
-| `-oallxyz OUTPUT`: Output x,y,z components
-| `-select STRING`: Selection string
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-n INPUT`：索引文件
+- `-oall OUTPUT`：输出所有距离
+- `-select STRING`：选择字符串
 
-**Common workflows**:
-- Basic: `echo "Group1\nGroup2" | gmx distance -s md.tpr -f md.xtc -n index.ndx -oall dist.xvg`
+**示例**：
+```bash
+gmx distance -s md.tpr -f md.xtc -select "com of group \"Protein\" com of group \"Ligand\"" -oall dist.xvg
+```
 
 ### `angle`
-Calculate angles between atom groups.
+计算角度。
 
-**Purpose**: Calculate angle between three atom groups.
+**用途**：计算三组原子间的角度。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-n INPUT`: Index file
-| `-oall OUTPUT`: Output all angles
-
-**Common workflows**:
-- Basic: `echo "Group1\nGroup2\nGroup3" | gmx angle -s md.tpr -f md.xtc -n index.ndx -oall angle.xvg`
+**示例**：
+```bash
+gmx angle -s md.tpr -f md.xtc -n index.ndx -oall angle.xvg
+```
 
 ### `dihedral`
-Calculate dihedral angles.
+计算二面角。
 
-**Purpose**: Calculate dihedral angles between four atom groups.
+**用途**：计算四组原子间的二面角。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-n INPUT`: Index file
-| `-oall OUTPUT`: Output all dihedrals
-
-**Common workflows**:
-- Basic: `echo "Group1\nGroup2\nGroup3\nGroup4" | gmx dihedral -s md.tpr -f md.xtc -n index.ndx -oall dih.xvg`
+**示例**：
+```bash
+gmx dihedral -s md.tpr -f md.xtc -n index.ndx -oall dih.xvg
+```
 
 ### `cluster`
-Cluster analysis of conformations.
+构象聚类分析。
 
-**Purpose**: Cluster trajectory frames based on RMSD.
+**用途**：基于 RMSD 对轨迹帧进行聚类。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-dm INPUT`: Distance matrix
-| `-method METHOD`: Clustering method (linkage, gromos, etc.)
-| `-cutoff DISTANCE`: Cutoff distance
-| `-cl OUTPUT`: Output cluster file
-| `-o OUTPUT`: Output XVG file
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-method ENUM`：聚类方法（linkage, jarvis-patrick, monte-carlo, diagonalization, gromos）
+- `-cutoff REAL`：截断距离
+- `-cl OUTPUT`：输出聚类文件
+- `-o OUTPUT`：输出聚类矩阵（.xpm）
+- `-g OUTPUT`：输出日志文件
+- `-sz OUTPUT`：输出聚类大小
 
-**Common workflows**:
-- Basic: `echo "Backbone" | gmx cluster -s md.tpr -f md.xtc -method gromos -cutoff 0.2 -cl clusters.xpm -o cluster_size.xvg`
+**示例**：
+```bash
+echo "Backbone" | gmx cluster -s md.tpr -f md.xtc -method gromos -cutoff 0.2 -cl clusters.pdb
+```
 
 ### `mindist`
-Calculate minimum distance between groups.
+计算组间最小距离。
 
-**Purpose**: Calculate minimum distance between atom groups.
+**用途**：计算原子组间的最小距离。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-n INPUT`: Index file
-| `-od OUTPUT`: Output minimum distance
-| `-pi OUTPUT`: Output periodic images
-
-**Common workflows**:
-- Basic: `echo "Group1\nGroup2" | gmx mindist -s md.tpr -f md.xtc -n index.ndx -od mindist.xvg`
+**示例**：
+```bash
+echo "Protein\nLigand" | gmx mindist -s md.tpr -f md.xtc -od mindist.xvg
+```
 
 ### `sasa`
-Calculate solvent accessible surface area.
+计算溶剂可及表面积。
 
-**Purpose**: Calculate SASA for selected atoms.
+**用途**：计算选定原子的 SASA。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-n INPUT`: Index file
-| `-o OUTPUT`: Output XVG file
-| `-surface OUTPUT`: Output SASA per atom
-| `-probe RADIUS`: Probe radius
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-o OUTPUT`：输出 XVG 文件
+- `-probe REAL`：探针半径（默认 0.14 nm）
+- `-surface SELECTION`：表面计算选择
+- `-output SELECTION`：输出选择
 
-**Common workflows**:
-- Basic: `echo "Protein" | gmx sasa -s md.tpr -f md.xtc -o sasa.xvg`
+**示例**：
+```bash
+gmx sasa -s md.tpr -f md.xtc -surface "protein" -o sasa.xvg
+```
 
 ### `principal`
-Principal component analysis of molecules.
+分子的主成分分析。
 
-**Purpose**: Calculate principal axes and moments of inertia.
+**用途**：计算主轴和惯性矩。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-n INPUT`: Index file
-| `-a OUTPUT`: Output XVG file with axes
-| `-i OUTPUT`: Output moments of inertia
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-n INPUT`：索引文件
+- `-a1 OUTPUT`：输出第一主轴
+- `-a2 OUTPUT`：输出第二主轴
+- `-a3 OUTPUT`：输出第三主轴
+- `-om OUTPUT`：输出惯性矩
 
-**Common workflows**:
-- Basic: `echo "Protein" | gmx principal -s md.tpr -f md.xtc -a axes.xvg -i inertia.xvg`
+**示例**：
+```bash
+echo "Protein" | gmx principal -s md.tpr -f md.xtc -a1 paxis1.xvg -om moi.xvg
+```
 
 ### `do_dssp`
-Secondary structure analysis (DSSP).
+二级结构分析（DSSP）。
 
-**Purpose**: Assign secondary structure using DSSP algorithm.
+**用途**：使用 DSSP 算法分配二级结构。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-sc OUTPUT`: Output secondary structure per residue
-| `-ss OUTPUT`: Output secondary structure fractions
-| `-a OUTPUT`: Output secondary structure area
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-n INPUT`：索引文件
+- `-o OUTPUT`：输出 XPM 文件（每残基二级结构）
+- `-sc OUTPUT`：输出 XVG 文件（二级结构比例）
 
-**Common workflows**:
-- Basic: `echo "Protein" | gmx do_dssp -s md.tpr -f md.xtc -sc ss.xpm -ss ss.xvg`
+**示例**：
+```bash
+echo "Protein" | gmx do_dssp -s md.tpr -f md.xtc -o ss.xpm -sc ss.xvg
+```
 
-## 5. Structural Analysis
+---
+
+## 5. 结构分析
 
 ### `covar`
-Covariance matrix analysis (for PCA).
+协方差矩阵分析（用于 PCA）。
 
-**Purpose**: Calculate covariance matrix of atomic fluctuations.
+**用途**：计算原子涨落的协方差矩阵。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-n INPUT`: Index file
-| `-o OUTPUT`: Output eigenvalues
-| `-v OUTPUT`: Output eigenvectors
-| `-xpma OUTPUT`: Output covariance matrix
-| `-ascii OUTPUT`: Output ASCII covariance matrix
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-n INPUT`：索引文件
+- `-o OUTPUT`：输出特征值（.xvg）
+- `-v OUTPUT`：输出特征向量（.trr）
+- `-av OUTPUT`：输出平均结构
+- `-ascii OUTPUT`：输出 ASCII 协方差矩阵
+- `-xpm OUTPUT`：输出协方差矩阵（.xpm）
+- `-xpma OUTPUT`：输出原子协方差矩阵
+- `-[no]fit`：拟合到参考结构
+- `-[no]mwa`：质量加权协方差分析
 
-**Common workflows**:
-- Basic: `echo "C-alpha\nC-alpha" | gmx covar -s md.tpr -f md.xtc -o eigen.xvg -v eigenvec.trr -xpma covar.xpm`
+**示例**：
+```bash
+echo "C-alpha\nC-alpha" | gmx covar -s md.tpr -f md.xtc -o eigenval.xvg -v eigenvec.trr
+```
 
 ### `anaeig`
-Analyze eigenvectors from covariance analysis.
+分析协方差分析的特征向量。
 
-**Purpose**: Project trajectory onto eigenvectors and analyze PCA.
+**用途**：将轨迹投影到特征向量上，进行 PCA 分析。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-v INPUT`: Input eigenvectors
-| `-first NUMBER`: First eigenvector to analyze
-| `-last NUMBER`: Last eigenvector to analyze
-| `-proj OUTPUT`: Output projection
-| `-2d OUTPUT`: Output 2D projection
-| `-extreme OUTPUT`: Output extreme structures
-| `-overlap OUTPUT`: Output overlap matrix
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-v INPUT`：输入特征向量文件
+- `-first INT`：第一个特征向量
+- `-last INT`：最后一个特征向量
+- `-proj OUTPUT`：输出投影
+- `-2d OUTPUT`：输出 2D 投影
+- `-extr OUTPUT`：输出极端结构
+- `-over OUTPUT`：输出重叠矩阵
 
-**Common workflows**:
-- Project on PC1: `echo "C-alpha\nC-alpha" | gmx anaeig -s md.tpr -f md.xtc -v eigenvec.trr -first 1 -last 1 -proj pc1.xvg`
-- 2D projection: `echo "C-alpha\nC-alpha" | gmx anaeig -s md.tpr -f md.xtc -v eigenvec.trr -first 1 -last 2 -2d 2dproj.xvg`
+**示例**：
+```bash
+echo "C-alpha\nC-alpha" | gmx anaeig -s md.tpr -f md.xtc -v eigenvec.trr -first 1 -last 2 -proj pc.xvg
+```
 
 ### `mdmat`
-Calculate distance matrix between residues.
+计算残基间距离矩阵。
 
-**Purpose**: Calculate average distance matrix between residues.
+**用途**：计算残基间的平均距离矩阵。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-n INPUT`: Index file
-| `-mean OUTPUT`: Output mean distance matrix
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-mean OUTPUT`：输出平均距离矩阵
 
-**Common workflows**:
-- Basic: `echo "Protein" | gmx mdmat -s md.tpr -f md.xtc -mean rdcm.xpm`
+**示例**：
+```bash
+echo "Protein" | gmx mdmat -s md.tpr -f md.xtc -mean rdcm.xpm
+```
 
 ### `sham`
-Generate free energy landscapes.
+生成自由能景观。
 
-**Purpose**: Generate free energy landscapes from reaction coordinates.
+**用途**：从反应坐标生成自由能景观。
 
-**Key parameters**:
-- `-f INPUT`: Input XVG file with reaction coordinates
-| `-tsham TEMP`: Temperature
-| `-ls OUTPUT`: Output Gibbs free energy
-| `-g OUTPUT`: Output log file
-| `-nlevels NUMBER`: Number of levels
+**常用参数**：
+- `-f INPUT`：输入 XVG 文件（包含反应坐标）
+- `-tsham REAL`：温度
+- `-ls OUTPUT`：输出 Gibbs 自由能
+- `-nlevels INT`：等高线数量
 
-**Common workflows**:
-- Basic: `gmx sham -f sham.xvg -tsham 310 -nlevels 100 -ls gibbs.xpm`
+**示例**：
+```bash
+gmx sham -f reaction.xvg -tsham 310 -nlevels 100 -ls fel.xpm
+```
 
 ### `order`
-Calculate order parameters.
+计算序参数。
 
-**Purpose**: Calculate lipid order parameters.
+**用途**：计算脂质序参数。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-n INPUT`: Index file
-| `-d OUTPUT`: Output deuterium order parameters
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-n INPUT`：索引文件
+- `-d ENUM`：膜法线方向（z, x, y）
+- `-o OUTPUT`：输出序参数
+- `-od OUTPUT`：输出氘序参数
 
-**Common workflows**:
-- Basic: `echo "Lipid" | gmx order -s md.tpr -f md.xtc -o order.xvg`
+**示例**：
+```bash
+gmx order -s md.tpr -f md.xtc -d z -o order.xvg
+```
 
 ### `rotacf`
-Calculate rotational autocorrelation functions.
+计算旋转自相关函数。
 
-**Purpose**: Calculate rotational correlation times.
+**用途**：计算旋转相关时间。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-n INPUT`: Index file
-| `-o OUTPUT`: Output correlation functions
-
-**Common workflows**:
-- Basic: `echo "Protein" | gmx rotacf -s md.tpr -f md.xtc -o rotacf.xvg`
+**示例**：
+```bash
+gmx rotacf -s md.tpr -f md.xtc -o rotacf.xvg
+```
 
 ### `dielectric`
-Calculate dielectric properties.
+计算介电性质。
 
-**Purpose**: Calculate dielectric constant and properties.
+**用途**：计算介电常数和性质。
 
-**Key parameters**:
-- `-f INPUT`: Input dipole moment trajectory
-| `-d OUTPUT`: Output dielectric constant
-| `-o OUTPUT`: Output correlation functions
+**示例**：
+```bash
+gmx dielectric -f dipole.xvg -d dielectric.xvg
+```
 
-**Common workflows**:
-- Basic: `gmx dielectric -f dipole.xvg -d dielectric.xvg`
+---
 
-## 6. Trajectory Processing
+## 6. 轨迹处理
 
 ### `trjconv`
-Convert trajectory formats, apply PBC correction, fit structures.
+转换轨迹格式、应用 PBC 修正、拟合结构。
 
-**Purpose**: Process trajectory files (format conversion, PBC correction, fitting).
+**用途**：处理轨迹文件（格式转换、PBC 修正、拟合）。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-o OUTPUT`: Output trajectory
-| `-n INPUT`: Index file
-| `-pbc TYPE`: PBC handling
-| `-center TYPE`: Centering
-| `-fit TYPE`: Fitting
-| `-ur TYPE`: Unit cell representation
-| `-b TIME`: Start time
-| `-e TIME`: End time
-| `-dt TIME`: Time step
-| `-pbc mol`: Keep molecules intact
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-f INPUT`：输入轨迹
+- `-o OUTPUT`：输出轨迹
+- `-n INPUT`：索引文件
+- `-pbc ENUM`：PBC 处理（none, mol, res, atom, nojump, cluster, whole）
+- `-[no]center`：居中
+- `-fit ENUM`：拟合（none, rot+trans, rotxy+transxy, translation, transxy, progressive）
+- `-ur ENUM`：晶胞表示（rect, tric, compact）
+- `-b TIME`：起始时间
+- `-e TIME`：结束时间
+- `-dt TIME`：时间步长
 
-**Common workflows**:
-- PBC correction: `echo "Protein\nProtein" | gmx trjconv -s md.tpr -f md.xtc -o fit.xtc -pbc mol -center`
-- Format conversion: `echo "Protein" | gmx trjconv -s md.tpr -f md.xtc -o md.pdb`
-- Remove translation/rotation: `echo "Backbone\nProtein" | gmx trjconv -s md.tpr -f md.xtc -o fit.xtc -fit rot+trans`
+**示例**：
+```bash
+echo "Protein\nProtein" | gmx trjconv -s md.tpr -f md.xtc -o centered.xtc -pbc mol -center
+echo "Backbone\nProtein" | gmx trjconv -s md.tpr -f md.xtc -o fit.xtc -fit rot+trans
+```
 
 ### `trjcat`
-Concatenate multiple trajectory files.
+合并多个轨迹文件。
 
-**Purpose**: Combine multiple trajectory files into one.
+**用途**：将多个轨迹文件合并为一个。
 
-**Key parameters**:
-- `-f INPUT`: Input trajectories
-| `-o OUTPUT`: Output trajectory
-| `-s INPUT`: Input .tpr file
-| `-cat`: Concatenate without time correction
+**常用参数**：
+- `-f INPUT`：输入轨迹文件
+- `-o OUTPUT`：输出轨迹
 
-**Common workflows**:
-- Basic: `gmx trjcat -f part1.xtc part2.xtc -o combined.xtc -s md.tpr`
+**示例**：
+```bash
+gmx trjcat -f part1.xtc part2.xtc -o combined.xtc
+```
 
 ### `trjorder`
-Reorder atoms in trajectory.
+重排轨迹中的原子。
 
-**Purpose**: Reorder atoms in trajectory file.
+**用途**：重排轨迹文件中的原子顺序。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-o OUTPUT`: Output trajectory
-| `-n INPUT`: Index file
-
-**Common workflows**:
-- Basic: `echo "Protein" | gmx trjorder -s md.tpr -f md.xtc -o ordered.xtc`
+**示例**：
+```bash
+gmx trjorder -s md.tpr -f md.xtc -o ordered.xtc
+```
 
 ### `dump`
-Dump trajectory to text format.
+将轨迹转储为文本格式。
 
-**Purpose**: Convert trajectory to ASCII text format.
+**用途**：将轨迹转换为 ASCII 文本格式。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-o OUTPUT`: Output text file
+**示例**：
+```bash
+gmx dump -s md.tpr -f md.xtc -o md.txt
+```
 
-**Common workflows**:
-- Basic: `gmx dump -s md.tpr -f md.xtc -o md.txt`
+---
 
-### `eneconv`
-Convert energy file formats.
-
-**Purpose**: Convert between different energy file formats.
-
-**Key parameters**:
-- `-f INPUT`: Input energy file
-| `-o OUTPUT`: Output energy file
-
-**Common workflows**:
-- Basic: `eneconv -f md.edr -o md_new.edr`
-
-## 7. Index and Selection
+## 7. 索引与选择
 
 ### `make_ndx`
-Create or edit index files.
+创建或编辑索引文件。
 
-**Purpose**: Create and modify index files with atom groups.
+**用途**：创建和修改包含原子组的索引文件。
 
-**Key parameters**:
-- `-f INPUT`: Input structure or .tpr file
-| `-o OUTPUT`: Output index file
-| `-n INPUT`: Input index file
-| `-t`: Use selection language
+**常用参数**：
+- `-f INPUT`：输入结构或 .tpr 文件
+- `-o OUTPUT`：输出索引文件
+- `-n INPUT`：输入索引文件
 
-**Common workflows**:
-- Create basic index: `gmx make_ndx -f md.tpr -o index.ndx`
-- Add protein-ligand group: `echo "Protein | Ligand\nq" | gmx make_ndx -f md.tpr -o index.ndx`
-- Add residue range: `echo "r 1-100\nname 10 Residues1-100\nq" | gmx make_ndx -f md.tpr -o index.ndx`
+**示例**：
+```bash
+gmx make_ndx -f md.tpr -o index.ndx
+echo "r 1-100\nname 10 Residues1-100\nq" | gmx make_ndx -f md.tpr -o index.ndx
+```
 
 ### `select`
-Select atoms using selection language.
+使用选择语言选择原子。
 
-**Purpose**: Select atoms using powerful selection syntax.
+**用途**：使用强大的选择语法选择原子。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-select STRING`: Selection string
-| `-on OUTPUT`: Output index file
-| `-os OUTPUT`: Output structure
-| `-om OUTPUT`: Output PDB with selections
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-select STRING`：选择字符串
+- `-on OUTPUT`：输出索引文件
+- `-os OUTPUT`：输出结构
 
-**Common workflows**:
-- Basic selection: `gmx select -s md.tpr -select "resid 1 to 100 and name CA" -on ca_res1-100.ndx`
-- Output structure: `gmx select -s md.tpr -select "protein" -os protein.pdb`
-
-### `genrestr`
-Generate position restraints.
-
-**Purpose**: Create position restraint files for equilibration.
-
-**Key parameters**:
-- `-f INPUT`: Input structure
-| `-o OUTPUT`: Output position restraint file
-| `-i INPUT`: Index file
-| `-fc NUMBER`: Force constant
-
-**Common workflows**:
-- Restrain protein backbone: `echo "Backbone" | gmx genrestr -f protein.gro -o posre.itp -fc 1000`
+**示例**：
+```bash
+gmx select -s md.tpr -select "resid 1 to 100 and name CA" -on ca.ndx
+gmx select -s md.tpr -select "protein" -os protein.pdb
+```
 
 ### `genion`
-Replace water molecules with ions.
+用水分子替换离子。
 
-**Purpose**: Replace solvent molecules with ions to neutralize system.
+**用途**：替换溶剂分子以中和系统或添加离子。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-p INPUT`: Input topology
-| `-o OUTPUT`: Output structure
-| `-pname NAME`: Positive ion name
-| `-nname NAME`: Negative ion name
-| `-pname NAME`: Positive ion name
-| `-nname NAME`: Negative ion name
-| `-conc CONC`: Ion concentration
-| `-neutral`: Neutralize system
-| `-p NUMBER`: Number of positive ions
-| `-n NUMBER`: Number of negative ions
+**常用参数**：
+- `-s INPUT`：输入 .tpr 文件
+- `-p INPUT`：输入拓扑
+- `-o OUTPUT`：输出结构
+- `-pname STRING`：正离子名称
+- `-nname STRING`：负离子名称
+- `-np INT`：正离子数量
+- `-nn INT`：负离子数量
+- `-conc REAL`：盐浓度（mol/L）
+- `-[no]neutral`：中和系统
 
-**Common workflows**:
-- Neutralize: `echo "SOL" | gmx genion -s ions.tpr -p topol.top -o ions.gro -pname NA -nname CL -neutral`
-- Add specific ions: `echo "SOL" | gmx genion -s ions.tpr -p topol.top -o ions.gro -pname NA -nname CL -p 10 -n 10`
+**示例**：
+```bash
+echo "SOL" | gmx genion -s ions.tpr -p topol.top -o ions.gro -pname NA -nname CL -neutral
+echo "SOL" | gmx genion -s ions.tpr -p topol.top -o ions.gro -pname NA -nname CL -np 10 -nn 10
+```
 
-## 8. Tools and Utilities
+---
+
+## 8. 工具与实用程序
 
 ### `xpm2ps`
-Convert XPM matrix files to PostScript.
+将 XPM 矩阵文件转换为 PostScript。
 
-**Purpose**: Convert XPM matrix files to PostScript for visualization.
+**用途**：将 XPM 矩阵文件转换为 PostScript 用于可视化。
 
-**Key parameters**:
-- `-f INPUT`: Input XPM file
-| `-o OUTPUT`: Output PostScript file
-| `-rainbow`: Use rainbow colors
-| `-title STRING`: Plot title
+**常用参数**：
+- `-f INPUT`：输入 XPM 文件
+- `-o OUTPUT`：输出 PostScript 文件
+- `-[no]rainbow`：使用彩虹色
 
-**Common workflows**:
-- Basic: `gmx xpm2ps -f matrix.xpm -o matrix.eps`
+**示例**：
+```bash
+gmx xpm2ps -f matrix.xpm -o matrix.eps
+```
 
 ### `x2top`
-Generate topology from coordinates.
+从坐标生成拓扑。
 
-**Purpose**: Generate topology from coordinates using force field.
+**用途**：使用力场从坐标生成拓扑。
 
-**Key parameters**:
-- `-f INPUT`: Input coordinates
-| `-o OUTPUT`: Output topology
-| `-ff FORCEFIELD`: Force field
-
-**Common workflows**:
-- Basic: `gmx x2top -f molecule.gro -o molecule.top -ff oplsaa`
+**示例**：
+```bash
+gmx x2top -f molecule.gro -o molecule.top
+```
 
 ### `check`
-Check simulation files for errors.
+检查模拟文件错误。
 
-**Purpose**: Validate simulation files and check for errors.
+**用途**：验证模拟文件并检查错误。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-f INPUT`: Input trajectory
-| `-e INPUT`: Input energy file
-
-**Common workflows**:
-- Basic: `gmx check -s md.tpr -f md.xtc -e md.edr`
+**示例**：
+```bash
+gmx check -s md.tpr -f md.xtc
+```
 
 ### `wham`
-Weighted histogram analysis method.
+加权直方图分析方法。
 
-**Purpose**: Calculate free energy profiles from umbrella sampling.
+**用途**：从伞形采样计算自由能剖面。
 
-**Key parameters**:
-- `-it INPUT`: Input tpr files
-| `-if INPUT`: Input pullf files
-| `-o OUTPUT`: Output profile
+**常用参数**：
+- `-it INPUT`：输入 tpr 文件列表
+- `-if INPUT`：输入拉力文件列表
+- `-o OUTPUT`：输出剖面
 
-**Common workflows**:
-- Basic: `gmx wham -it tprs.dat -if pullf-files.dat -o profile.xvg`
+**示例**：
+```bash
+gmx wham -it tprs.dat -if pullf-files.dat -o profile.xvg
+```
 
 ### `tune_pme`
-Tune PME parameters for performance.
+优化 PME 参数。
 
-**Purpose**: Optimize PME parameters for specific hardware.
+**用途**：为特定硬件优化 PME 参数。
 
-**Key parameters**:
-- `-s INPUT`: Input .tpr file
-| `-np NUMBER`: Number of processors
+**示例**：
+```bash
+gmx tune_pme -s md.tpr -np 4
+```
 
-**Common workflows**:
-- Basic: `gmx tune_pme -s md.tpr -np 4`
+---
 
-## Command Summary by Category
+## 命令分类总结
 
-- **Topology/Structure**: pdb2gmx, editconf, solvate, insert-molecules, genrestr
-- **Simulation Setup**: grompp, mdrun, mdrun-mpi
-- **Energy Analysis**: energy, eneconv, bar
-- **Trajectory Analysis**: rms, rmsf, gyrate, hbond, distance, angle, dihedral, cluster, mindist, sasa, principal, do_dssp
-- **Structural Analysis**: covar, anaeig, mdmat, sham, order, rotacf, dielectric
-- **Trajectory Processing**: trjconv, trjcat, trjorder, dump, eneconv
-- **Index/Selection**: make_ndx, select, genrestr, genion
-- **Tools/Utilities**: xpm2ps, x2top, check, wham, tune_pme
+| 分类 | 命令 |
+|------|------|
+| 拓扑/结构 | pdb2gmx, editconf, solvate, insert-molecules, genrestr |
+| 模拟设置 | grompp, mdrun |
+| 能量分析 | energy, eneconv, bar |
+| 轨迹分析 | rms, rmsf, gyrate, hbond, distance, angle, dihedral, cluster, mindist, sasa, principal, do_dssp |
+| 结构分析 | covar, anaeig, mdmat, sham, order, rotacf, dielectric |
+| 轨迹处理 | trjconv, trjcat, trjorder, dump |
+| 索引/选择 | make_ndx, select, genion |
+| 工具/实用 | xpm2ps, x2top, check, wham, tune_pme |

@@ -2,550 +2,353 @@
 
 This document explains frequently used GROMACS parameters across different commands.
 
-## Input/Output File Parameters
+> **重要**：不同命令支持的参数不同。以下为常见参数概述，具体参数请使用 `gmx <command> -h` 查看。
+
+## 目录
+
+- [输入输出参数](#输入输出参数)
+- [时间选择参数](#时间选择参数)
+- [轨迹处理参数](#轨迹处理参数)
+- [性能参数](#性能参数)
+- [其他常用参数](#其他常用参数)
+- [参数分组](#参数分组)
+
+---
+
+## 输入输出参数
 
 ### `-f INPUT`
-**Input trajectory or structure file**
+**输入轨迹或结构文件**
 
-- **Purpose**: Specify primary input file
-- **Common formats**: .xtc, .trr, .gro, .pdb, .edr
-- **Usage examples**:
+- 常见格式：.xtc, .trr, .gro, .pdb, .edr
+- 示例：
   ```bash
   gmx rms -s md.tpr -f md.xtc -o rmsd.xvg
   gmx energy -f md.edr -o energy.xvg
   ```
 
 ### `-s INPUT`
-**Input topology file (.tpr)**
+**输入拓扑文件（.tpr）**
 
-- **Purpose**: Specify portable run input file containing topology and parameters
-- **Format**: .tpr only
-- **Usage examples**:
+- 格式：仅 .tpr
+- 示例：
   ```bash
   gmx rms -s md.tpr -f md.xtc -o rmsd.xvg
   gmx trjconv -s md.tpr -f md.xtc -o fit.xtc
   ```
 
 ### `-n INPUT`
-**Input index file (.ndx)**
+**输入索引文件（.ndx）**
 
-- **Purpose**: Specify index file with atom groups
-- **Format**: .ndx only
-- **Usage examples**:
+- 格式：仅 .ndx
+- 示例：
   ```bash
   echo "Protein" | gmx rms -s md.tpr -f md.xtc -n index.ndx -o rmsd.xvg
-  gmx make_ndx -f md.tpr -o index.ndx
-  ```
-
-### `-c INPUT`
-**Input structure file**
-
-- **Purpose**: Specify coordinate file (used in grompp, editconf)
-- **Common formats**: .gro, .pdb
-- **Usage examples**:
-  ```bash
-  gmx editconf -f protein.pdb -o protein.gro
-  gmx grompp -f mdp/minim.mdp -c ions.gro -p topol.top -o em.tpr
-  ```
-
-### `-p INPUT`
-**Input topology file (.top)**
-
-- **Purpose**: Specify topology file (used in grompp, genion)
-- **Format**: .top only
-- **Usage examples**:
-  ```bash
-  gmx grompp -f mdp/minim.mdp -c ions.gro -p topol.top -o em.tpr
-  echo "SOL" | gmx genion -s ions.tpr -p topol.top -o ions.gro -pname NA -nname CL -neutral
   ```
 
 ### `-o OUTPUT`
-**Output file**
+**输出文件**
 
-- **Purpose**: Specify primary output file
-- **Format depends on command**: .xvg, .xtc, .trr, .gro, .pdb, .edr, etc.
-- **Usage examples**:
+- 格式取决于命令：.xvg, .xtc, .trr, .gro, .pdb 等
+- 示例：
   ```bash
   gmx rms -s md.tpr -f md.xtc -o rmsd.xvg
   gmx trjconv -s md.tpr -f md.xtc -o fit.xtc
   ```
 
 ### `-deffnm BASENAME`
-**Default filename base**
+**默认文件名前缀**
 
-- **Purpose**: Set default filename base for output files
-- **Common usage**: In mdrun to simplify output naming
-- **Usage examples**:
+- 用于 mdrun 简化输出文件命名
+- 示例：
   ```bash
-  gmx mdrun -s em.tpr -deffnm em  # Creates em.log, em.edr, em.trr, etc.
-  gmx mdrun -s md.tpr -deffnm md  # Creates md.log, md.edr, md.xtc, etc.
+  gmx mdrun -s em.tpr -deffnm em  # 生成 em.log, em.edr, em.trr 等
   ```
 
-## Time Selection Parameters
+### `-c INPUT`
+**输入结构文件**
+
+- 用于 grompp, editconf 等命令
+- 格式：.gro, .pdb
+- 示例：
+  ```bash
+  gmx grompp -f minim.mdp -c ions.gro -p topol.top -o em.tpr
+  ```
+
+### `-p INPUT`
+**输入拓扑文件（.top）**
+
+- 用于 grompp, genion
+- 格式：仅 .top
+
+---
+
+## 时间选择参数
 
 ### `-b TIME`
-**Start time**
+**起始时间**
 
-- **Purpose**: Specify start time for analysis
-- **Unit**: picoseconds (ps)
-- **Usage examples**:
+- 单位：皮秒（ps）
+- 示例：
   ```bash
-  # Analyze from 10 ns onwards
   gmx rms -s md.tpr -f md.xtc -b 10000 -o rmsd.xvg
   ```
 
 ### `-e TIME`
-**End time**
+**结束时间**
 
-- **Purpose**: Specify end time for analysis
-- **Unit**: picoseconds (ps)
-- **Usage examples**:
+- 单位：皮秒（ps）
+- 示例：
   ```bash
-  # Analyze first 50 ns
   gmx rms -s md.tpr -f md.xtc -e 50000 -o rmsd.xvg
   ```
 
 ### `-dt TIME`
-**Time step**
+**时间步长**
 
-- **Purpose**: Specify time step for output (frame selection)
-- **Unit**: picoseconds (ps)
-- **Usage examples**:
+- 单位：皮秒（ps）
+- 用于选择输出帧
+- 示例：
   ```bash
-  # Output every 100 ps
   gmx trjconv -s md.tpr -f md.xtc -o reduced.xtc -dt 100
   ```
 
-## Trajectory Processing Parameters
+### `-tu ENUM`
+**时间单位**
 
-### `-pbc TYPE`
-**Periodic boundary condition handling**
-
-- **Purpose**: Handle periodic boundary conditions in trajectories
-- **Options**:
-  - `none`: No PBC correction
-  - `mol`: Keep molecules whole
-  - `atom`: Keep atoms whole (default)
-  - `com`: Center on center of mass
-  - `nojump`: Prevent atoms from jumping across PBC
-  - `cluster`: Cluster molecules together
-- **Usage examples**:
+- 选项：fs, ps, ns, us, ms, s
+- 示例：
   ```bash
-  # Keep molecules intact
+  gmx trjconv -s md.tpr -f md.xtc -b 10 -tu ns -o out.xtc
+  ```
+
+---
+
+## 轨迹处理参数
+
+### `-pbc ENUM`
+**周期性边界条件处理**
+
+- **选项**：
+  - `none`：不处理 PBC（默认）
+  - `mol`：将分子质心放入盒子（需要 .tpr 文件）
+  - `res`：将残基质心放入盒子
+  - `atom`：将所有原子放入盒子
+  - `nojump`：检查原子是否跳过盒子边界并放回
+  - `cluster`：聚类选中的原子
+  - `whole`：仅使断裂分子完整
+- 示例：
+  ```bash
   echo "Protein" | gmx trjconv -s md.tpr -f md.xtc -o mol.xtc -pbc mol
-
-  # Prevent jumps
   echo "Protein" | gmx trjconv -s md.tpr -f md.xtc -o nojump.xtc -pbc nojump
-
-  # Center on COM
-  echo "Protein" | gmx trjconv -s md.tpr -f md.xtc -o com.xtc -pbc com
   ```
 
-### `-center TYPE`
-**Center coordinates**
+### `-[no]center`
+**居中坐标**
 
-- **Purpose**: Center simulation box on specified group
-- **Usage examples**:
+- 开关选项，默认 no
+- 示例：
   ```bash
-  # Center on protein
   echo "Protein\nProtein" | gmx trjconv -s md.tpr -f md.xtc -o centered.xtc -center
-
-  # Center on center atom
-  echo "center\nProtein" | gmx trjconv -s md.tpr -f md.xtc -o centered.xtc -center
   ```
 
-### `-fit TYPE`
-**Fit trajectory to reference**
+### `-fit ENUM`
+**拟合轨迹到参考结构**
 
-- **Purpose**: Fit trajectory to reference structure (remove translation/rotation)
-- **Options**:
-  - `none`: No fitting
-  - `xyz`: Fit on x, y, z coordinates
-  - `rotxy`: Fit on rotation in x-y plane
-  - `xy`: Fit on x-y plane only
-  - `progressive`: Progressive fitting
-  - `transxy`: Translation in x-y plane only
-  - `rot+trans`: Rotation + translation (most common)
-- **Usage examples**:
+- **选项**：
+  - `none`：不拟合（默认）
+  - `rot+trans`：旋转 + 平移（最常用）
+  - `rotxy+transxy`：xy 平面旋转 + xy 平移
+  - `translation`：仅平移
+  - `transxy`：仅 xy 平移
+  - `progressive`：渐进式拟合
+- 示例：
   ```bash
-  # Remove translation and rotation
-  echo "Backbone\nProtein" | gmx trjconv -s md.tpr -f md.xtc -o fit.xtc -fit rot+trans
-
-  # Fit on backbone
   echo "Backbone\nProtein" | gmx trjconv -s md.tpr -f md.xtc -o fit.xtc -fit rot+trans
   ```
 
-### `-ur TYPE`
-**Unit cell representation**
+### `-ur ENUM`
+**晶胞表示方式**
 
-- **Purpose**: Control how unit cell is represented
-- **Options**:
-  - `compact`: Compact representation (default)
-  - `triclinic`: Full triclinic box
-  - `rect`: Rectangular box
-- **Usage examples**:
+- **选项**：
+  - `rect`：矩形（默认）
+  - `tric`：三斜
+  - `compact`：紧凑表示
+- 示例：
   ```bash
-  echo "Protein" | gmx trjconv -s md.tpr -f md.xtc -o rect.xtc -ur rect
+  echo "Protein" | gmx trjconv -s md.tpr -f md.xtc -o compact.xtc -ur compact
   ```
 
-## Performance Parameters
+### `-boxcenter ENUM`
+**盒子中心位置**
 
-### `-nt NUMBER`
-**Number of threads**
+- **选项**：
+  - `tric`：盒子向量和的一半
+  - `rect`：盒子对角线的一半
+  - `zero`：零点
 
-- **Purpose**: Specify number of CPU threads
-- **Usage examples**:
+---
+
+## 性能参数
+
+以下参数主要用于 `gmx mdrun`。
+
+### `-nt INT`
+**总线程数**
+
+- 0 表示自动检测
+- 示例：
   ```bash
-  # Use 4 threads
   gmx mdrun -s md.tpr -deffnm md -nt 4
-
-  # Use 8 threads
-  gmx mdrun -s md.tpr -deffnm md -nt 8
   ```
 
-### `-ntmpi NUMBER`
-**Number of MPI threads**
+### `-ntmpi INT`
+**线程 MPI 进程数**
 
-- **Purpose**: Specify number of MPI ranks
-- **Usage examples**:
+- 0 表示自动检测
+- 示例：
   ```bash
-  # Use 4 MPI ranks
-  mpirun -np 4 gmx_mpi mdrun -s md.tpr -deffnm md
-
-  # Use 8 MPI ranks with 2 OpenMP threads each
-  mpirun -np 8 gmx_mpi mdrun -ntomp 2 -s md.tpr -deffnm md
+  gmx mdrun -s md.tpr -deffnm md -ntmpi 4
   ```
 
-### `-ntomp NUMBER`
-**OpenMP threads per MPI rank**
+### `-ntomp INT`
+**每个 MPI 进程的 OpenMP 线程数**
 
-- **Purpose**: Specify number of OpenMP threads per MPI rank
-- **Usage examples**:
+- 0 表示自动检测
+- 示例：
   ```bash
-  # 2 MPI ranks, 4 OpenMP threads each
-  mpirun -np 2 gmx_mpi mdrun -ntomp 4 -s md.tpr -deffnm md
-
-  # 4 MPI ranks, 2 OpenMP threads each
-  mpirun -np 4 gmx_mpi mdrun -ntomp 2 -s md.tpr -deffnm md
+  mpirun -np 2 gmx_mpi mdrun -s md.tpr -deffnm md -ntomp 4
   ```
 
-### `-nb TYPE`
-**Neighbor searching type**
+### `-nb ENUM`
+**非键相互作用计算位置**
 
-- **Purpose**: Specify hardware for neighbor searching
-- **Options**:
-  - `cpu`: Use CPU
-  - `gpu`: Use GPU (default when GPU available)
-- **Usage examples**:
+- **选项**：
+  - `auto`：自动选择（默认）
+  - `cpu`：使用 CPU
+  - `gpu`：使用 GPU
+- 示例：
   ```bash
-  # Use GPU for neighbor searching
   gmx mdrun -s md.tpr -deffnm md -ntomp 4 -nb gpu
-
-  # Use CPU for neighbor searching
-  gmx mdrun -s md.tpr -deffnm md -ntomp 4 -nb cpu
   ```
 
-### `-update TYPE`
-**Update method**
+### `-pme ENUM`
+**PME 计算位置**
 
-- **Purpose**: Specify hardware for constraint updates
-- **Options**:
-  - `cpu`: Use CPU (default)
-  - `gpu`: Use GPU
-- **Usage examples**:
+- **选项**：`auto`, `cpu`, `gpu`
+- 示例：
   ```bash
-  # Use GPU for updates
-  gmx mdrun -s md.tpr -deffnm md -ntomp 4 -nb gpu -update gpu
+  gmx mdrun -s md.tpr -deffnm md -nb gpu -pme gpu
   ```
 
-### `-pme TYPE`
-**PME method**
+### `-pmefft ENUM`
+**PME FFT 计算位置**
 
-- **Purpose**: Specify hardware for PME electrostatics
-- **Options**:
-  - `cpu`: Use CPU
-  - `gpu`: Use GPU
-- **Usage examples**:
+- **选项**：`auto`, `cpu`, `gpu`
+
+### `-bonded ENUM`
+**键合相互作用计算位置**
+
+- **选项**：`auto`, `cpu`, `gpu`
+
+### `-update ENUM`
+**更新和约束计算位置**
+
+- **选项**：`auto`, `cpu`, `gpu`
+
+### `-[no]tunepme`
+**优化 PME 负载**
+
+- 开关选项，默认 yes
+- 示例：
   ```bash
-  # Use GPU for PME
-  gmx mdrun -s md.tpr -deffnm md -ntomp 4 -nb gpu -pme gpu
+  gmx mdrun -s md.tpr -deffnm md -notunepme
   ```
 
-### `-bonded TYPE`
-**Bonded interactions**
+### `-gpu_id STRING`
+**GPU 设备 ID 列表**
 
-- **Purpose**: Specify hardware for bonded interactions
-- **Options**:
-  - `cpu`: Use CPU (default)
-  - `gpu`: Use GPU
-- **Usage examples**:
+- 指定可用的 GPU 设备 ID
+- 示例：
   ```bash
-  # Use GPU for bonded interactions
-  gmx mdrun -s md.tpr -deffnm md -ntomp 4 -bonded gpu
+  gmx mdrun -s md.tpr -deffnm md -gpu_id 01
   ```
 
-### `-tunepme`
-**Tune PME parameters**
+### `-gputasks STRING`
+**GPU 任务映射**
 
-- **Purpose**: Automatically tune PME parameters for optimal performance
-- **Usage examples**:
+- 指定每个任务映射到哪个 GPU
+
+---
+
+## 其他常用参数
+
+### `-maxwarn INT`
+**最大警告忽略数**
+
+- 用于 grompp，谨慎使用
+- 示例：
   ```bash
-  # Tune PME parameters
-  gmx mdrun -s md.tpr -deffnm md -ntomp 4 -tunepme
+  gmx grompp -f md.mdp -c npt.gro -p topol.top -o md.tpr -maxwarn 1
   ```
 
-### `-gpu_id ID`
-**GPU device ID**
+### `-cpt REAL`
+**检查点间隔**
 
-- **Purpose**: Specify which GPU to use
-- **Usage examples**:
+- 单位：分钟，默认 15
+- 示例：
   ```bash
-  # Use GPU 0
-  gmx mdrun -s md.tpr -deffnm md -ntomp 4 -gpu_id 0
-
-  # Use GPU 1
-  gmx mdrun -s md.tpr -deffnm md -ntomp 4 -gpu_id 1
-  ```
-
-## Analysis Parameters
-
-### `-type TYPE`
-**Calculation type**
-
-- **Purpose**: Specify type of calculation
-- **Usage examples**:
-  ```bash
-  # Different types depending on command
-  gmx rms -s md.tpr -f md.xtc -o rmsd.xvg -type fit
-  ```
-
-### `-ng NUMBER`
-**Number of groups**
-
-- **Purpose**: Specify number of groups for analysis
-- **Usage examples**:
-  ```bash
-  # Analyze hydrogen bonds with 2 groups
-  echo "Protein\nProtein" | gmx hbond -s md.tpr -f md.xtc -num hb.xvg
-  ```
-
-### `-frame FRAME`
-**Specific frame number**
-
-- **Purpose**: Specify specific frame for analysis
-- **Usage examples**:
-  ```bash
-  # Extract frame 1000
-  gmx trjconv -s md.tpr -f md.xtc -o frame1000.pdb -dump 1000
-  ```
-
-## Output Control Parameters
-
-### `-nice LEVEL`
-**Nice level for CPU usage**
-
-- **Purpose**: Set process priority (nice level)
-- **Range**: -20 (highest priority) to 19 (lowest priority)
-- **Usage examples**:
-  ```bash
-  # Run with low priority
-  gmx mdrun -s md.tpr -deffnm md -nice 10
-
-  # Run with high priority
-  gmx mdrun -s md.tpr -deffnm md -nice -5
-  ```
-
-### `-mpi`
-**Enable MPI**
-
-- **Purpose**: Enable MPI parallelization
-- **Usage examples**:
-  ```bash
-  # Run with MPI
-  mpirun -np 4 gmx_mpi mdrun -s md.tpr -deffnm md
-  ```
-
-## Visualization Parameters
-
-### `-xvg TYPE`
-**Plot format**
-
-- **Purpose**: Specify output plot format for XVG files
-- **Options**:
-  - `none`: No plot format
-  - `xmgrace`: Grace/Xmgr format (default)
-  - `xmgr`: Xmgr format
-  - `matplotlib`: Matplotlib format
-- **Usage examples**:
-  ```bash
-  # Output in Grace format
-  gmx rms -s md.tpr -f md.xtc -o rmsd.xvg -xvg xmgrace
-
-  # Output in Matplotlib format
-  gmx rms -s md.tpr -f md.xtc -o rmsd.xvg -xvg matplotlib
-  ```
-
-## Specialized Parameters
-
-### `-maxwarn NUMBER`
-**Maximum number of warnings to ignore**
-
-- **Purpose**: Ignore warnings in grompp (use with caution)
-- **Usage examples**:
-  ```bash
-  # Ignore up to 3 warnings
-  gmx grompp -f mdp/md.mdp -c npt.gro -p topol.top -o md.tpr -maxwarn 3
-  ```
-
-### `-cpt NUMBER`
-**Checkpoint interval**
-
-- **Purpose**: Set checkpoint interval in minutes
-- **Usage examples**:
-  ```bash
-  # Write checkpoint every 15 minutes
-  gmx mdrun -s md.tpr -deffnm md -cpt 15
-
-  # Write checkpoint every 30 minutes
   gmx mdrun -s md.tpr -deffnm md -cpt 30
   ```
 
-### `-nsteps NUMBER`
-**Override number of steps**
+### `-nsteps INT`
+**覆盖步数**
 
-- **Purpose**: Override number of steps from .mdp file
-- **Usage examples**:
+- -1 表示无限，-2 表示使用 .mdp 设置（默认）
+- 示例：
   ```bash
-  # Run 100000 steps instead of .mdp setting
   gmx mdrun -s md.tpr -deffnm md -nsteps 100000
   ```
 
-### `-replex NUMBER`
-**Number of replica exchange steps**
+### `-replex INT`
+**副本交换周期**
 
-- **Purpose**: Set number of steps between replica exchange attempts
-- **Usage examples**:
+- 单位：步数
+- 示例：
   ```bash
-  # Exchange every 1000 steps
   gmx mdrun -s md.tpr -deffnm md -replex 1000
   ```
 
-## Restart Parameters
-
-### `-t INPUT`
-**Input trajectory for restart**
-
-- **Purpose**: Specify input trajectory for restarting simulation
-- **Usage examples**:
-  ```bash
-  # Restart from checkpoint
-  gmx grompp -f mdp/md.mdp -c md.cpt -t md.cpt -p topol.top -o md.tpr
-  ```
-
-### `-e INPUT`
-**Input energy file for restart**
-
-- **Purpose**: Specify input energy file for restarting simulation
-- **Usage examples**:
-  ```bash
-  # Restart from checkpoint
-  gmx grompp -f mdp/md.mdp -c md.cpt -t md.cpt -e md.edr -p topol.top -o md.tpr
-  ```
-
-## Index and Selection Parameters
-
 ### `-select STRING`
-**Selection string**
+**选择字符串**
 
-- **Purpose**: Select atoms using selection language
-- **Usage examples**:
+- 使用选择语言选择原子
+- 示例：
   ```bash
-  # Select residues 1-100
   gmx select -s md.tpr -select "resid 1 to 100" -on res1-100.ndx
-
-  # Select backbone atoms
   gmx select -s md.tpr -select "backbone" -on backbone.ndx
-
-  # Select protein and exclude hydrogens
   gmx select -s md.tpr -select "protein and not hydrogen" -on protein_noH.ndx
   ```
 
-## Reference Structure Parameters
+---
 
-### `-r INPUT`
-**Reference structure for fitting**
+## 参数分组
 
-- **Purpose**: Specify reference structure for fitting
-- **Usage examples**:
-  ```bash
-  # Use average structure as reference
-  gmx grompp -f mdp/md.mdp -c npt.gro -r average.pdb -p topol.top -o md.tpr
-  ```
+| 分组 | 参数 |
+|------|------|
+| 输入文件 | `-f`, `-s`, `-n`, `-c`, `-p` |
+| 输出文件 | `-o`, `-deffnm` |
+| 时间选择 | `-b`, `-e`, `-dt`, `-tu` |
+| 轨迹处理 | `-pbc`, `-center`, `-fit`, `-ur` |
+| 性能 | `-nt`, `-ntmpi`, `-ntomp`, `-nb`, `-pme`, `-bonded`, `-update`, `-gpu_id` |
+| 控制 | `-maxwarn`, `-cpt`, `-nsteps`, `-replex` |
 
-## Output Processing Parameters
+---
 
-### `-po OUTPUT`
-**Processed topology**
+## 最佳实践
 
-- **Purpose**: Output processed topology file
-- **Usage examples**:
-  ```bash
-  # Output processed topology
-  gmx grompp -f mdp/md.mdp -c npt.gro -p topol.top -o md.tpr -po processed.top
-  ```
-
-## Energy Parameters
-
-### `-dp`
-**Remove drift from energy**
-
-- **Purpose**: Remove linear drift from energy data
-- **Usage examples**:
-  ```bash
-  # Remove drift from potential energy
-  echo "Potential" | gmx energy -f md.edr -o potential.xvg -dp
-  ```
-
-### `-ee`
-**Estimate error**
-
-- **Purpose**: Estimate error in energy (requires multiple simulations)
-- **Usage examples**:
-  ```bash
-  # Estimate error
-  echo "Potential" | gmx energy -f md.edr -o potential.xvg -ee
-  ```
-
-## Parameter Groups
-
-### Input File Group
-- `-f`, `-s`, `-n`, `-c`, `-p`, `-t`, `-e`, `-r`
-
-### Output File Group
-- `-o`, `-deffnm`, `-po`
-
-### Time Selection Group
-- `-b`, `-e`, `-dt`
-
-### Trajectory Processing Group
-- `-pbc`, `-center`, `-fit`, `-ur`
-
-### Performance Group
-- `-nt`, `-ntmpi`, `-ntomp`, `-nb`, `-update`, `-pme`, `-bonded`, `-gpu_id`
-
-### Control Group
-- `-nice`, `-maxwarn`, `-cpt`, `-nsteps`
-
-### Visualization Group
-- `-xvg`
-
-## Tips and Best Practices
-
-1. **Always use absolute paths** when running on clusters or complex directory structures
-2. **Check file compatibility** before running (use `gmx check`)
-3. **Use appropriate time units** (picoseconds for -b, -e, -dt)
-4. **Monitor performance** with different thread/GPU settings
-5. **Save checkpoint files** regularly for long simulations
-6. **Document all parameters** for reproducibility
-7. **Test on small systems** before large simulations
-8. **Use appropriate file formats** (.xtc for storage, .trr for analysis)
+1. **始终使用 `gmx <command> -h`** 查看准确的参数信息
+2. **注意版本差异**：不同 GROMACS 版本参数可能不同
+3. **使用绝对路径**：在集群或复杂目录结构中运行时
+4. **记录所有参数**：以便复现
+5. **小系统测试**：在大模拟前先测试
