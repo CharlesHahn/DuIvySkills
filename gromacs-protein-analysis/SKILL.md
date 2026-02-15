@@ -13,6 +13,29 @@ description: "用于分析和可视化 GROMACS 蛋白质分子动力学模拟结
 - 了解 GROMACS 命令（需要时调用 `gromacs-skills`）
 - 可视化：DuIvyTools 技能（需要时调用 `duivytools-skills`）
 
+## 平台兼容性说明
+
+本文档中的命令使用 `echo -e` 格式传递管道输入，适用于 Linux/macOS 或 Git Bash 环境。
+
+**Windows PowerShell 用户**请使用以下替代格式：
+
+| Linux/Git Bash | Windows PowerShell |
+|----------------|-------------------|
+| `echo -e "Protein\n"` | `"Protein"` |
+| `echo -e "Protein\nProtein\n"` | `"Protein`nProtein"` |
+| `printf "text\n"` | `Write-Output "text"` |
+
+**示例转换**：
+```bash
+# Linux/Git Bash
+echo -e "Protein\nProtein\n" | gmx trjconv -s md.tpr -f md.xtc -o center.xtc -center
+
+# Windows PowerShell
+"Protein`nProtein" | gmx trjconv -s md.tpr -f md.xtc -o center.xtc -center
+```
+
+**建议**：Windows 用户推荐使用 Git Bash 或 WSL 执行本文档中的命令。
+
 ## 分析类型
 
 ### 1. 周期性边界条件（PBC）修正

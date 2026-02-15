@@ -13,7 +13,7 @@
 ### 命令
 
 ```bash
-echo -e "Protein" | gmx gyrate -s md.tpr -f md.xtc -o gyrate.xvg
+echo -e "Protein\n" | gmx gyrate -s md.tpr -f md.xtc -o gyrate.xvg
 ```
 - **目的**：计算蛋白质回转半径时间序列，评估紧致性
 - **参数说明**：

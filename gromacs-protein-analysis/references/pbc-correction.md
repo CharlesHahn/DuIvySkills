@@ -13,21 +13,6 @@
 ### 命令
 
 ```bash
-# 步骤 1：居中系统（方法 A：以蛋白质组居中）
-echo -e "Protein\nProtein\n" | gmx trjconv -s md.tpr -f md.xtc -o center.xtc -pbc atom -center
-```
-- **目的**：将蛋白质居中到模拟盒中心
-- **参数说明**：
-  - `-s md.tpr`：输入拓扑文件，提供系统结构和盒子信息
-  - `-f md.xtc`：输入轨迹文件
-  - `-o center.xtc`：输出居中后的轨迹
-  - `-pbc atom`：以原子为单位处理周期性，确保所有原子移入主盒
-  - `-center`：启用居中功能
-- **管道输入**：`"Protein\nProtein\n"` 第一个 Protein 为居中参考组（系统以此组为中心），第二个 Protein 为输出组（输出此组的轨迹）
-
-### 方法 B：以蛋白质中心原子居中（更精确）
-
-```bash
 # 步骤 1a：提取第一帧结构
 echo -e "Protein\n" | gmx trjconv -s md.tpr -f md.xtc -o first_frame.gro -dump 0
 ```
@@ -65,15 +50,27 @@ printf "\n[ CenterAtom ]\n{原子索引}\n" >> index.ndx
 
 ```bash
 # 步骤 1d：以中心原子居中
-echo -e "CenterAtom\nProtein\n" | gmx trjconv -s md.tpr -f md.xtc -n center.ndx -o center.xtc -pbc atom -center
+echo -e "CenterAtom\nProtein\n" | gmx trjconv -s md.tpr -f md.xtc -n index.ndx -o center.xtc -pbc atom -center
 ```
 - **目的**：以中心原子为参考将蛋白质居中到盒子中心
 - **参数说明**：
-  - `-n center.ndx`：输入自定义索引文件
+  - `-n index.ndx`：输入自定义索引文件
   - `-pbc atom`：以原子为单位处理周期性
   - `-center`：启用居中功能
 - **管道输入**：`"CenterAtom\nProtein\n"` 第一个 CenterAtom 为居中参考组（单个原子），第二个 Protein 为输出组
 - **选择原因**：以单个中心原子居中可避免蛋白质组居中时的漂移问题，对于蛋白质构象变化大的模拟更稳定
+
+### 备选方法：以蛋白质组居中
+
+```bash
+# 直接以蛋白质组居中（适用于构象变化小的模拟）
+echo -e "Protein\nProtein\n" | gmx trjconv -s md.tpr -f md.xtc -o center.xtc -pbc atom -center
+```
+- **目的**：将蛋白质整体居中到模拟盒中心
+- **管道输入**：`"Protein\nProtein\n"` 第一个 Protein 为居中参考组，第二个 Protein 为输出组
+- **适用场景**：蛋白质构象变化较小、对居中精度要求不高的情况
+
+---
 
 ```bash
 # 步骤 2：保持分子完整性

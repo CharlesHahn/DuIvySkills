@@ -13,7 +13,7 @@
 ### 命令
 
 ```bash
-echo -e "C-alpha" | gmx mdmat -s md.tpr -f md.xtc -mean rdcm.xpm
+echo -e "C-alpha\n" | gmx mdmat -s md.tpr -f md.xtc -mean rdcm.xpm
 ```
 - **目的**：计算残基对之间的平均距离矩阵
 - **参数说明**：

@@ -13,7 +13,7 @@
 ### 命令
 
 ```bash
-echo -e "Protein" | gmx sasa -s md.tpr -f md.xtc -o sasa.xvg
+echo -e "Protein\n" | gmx sasa -s md.tpr -f md.xtc -o sasa.xvg
 ```
 - **目的**：计算蛋白质总溶剂可及表面积的时间序列
 - **参数说明**：
@@ -26,7 +26,7 @@ echo -e "Protein" | gmx sasa -s md.tpr -f md.xtc -o sasa.xvg
 ### 可选参数：每残基 SASA
 
 ```bash
-echo -e "Protein" | gmx sasa -s md.tpr -f md.xtc -o sasa.xvg -or sas_residue.xvg
+echo -e "Protein\n" | gmx sasa -s md.tpr -f md.xtc -o sasa.xvg -or sas_residue.xvg
 ```
 - `-or sas_residue.xvg`：输出每个残基的平均 SASA
 - **用途**：识别暴露残基和被掩埋残基
@@ -34,7 +34,7 @@ echo -e "Protein" | gmx sasa -s md.tpr -f md.xtc -o sasa.xvg -or sas_residue.xvg
 ### 可选参数：探针半径
 
 ```bash
-echo -e "Protein" | gmx sasa -s md.tpr -f md.xtc -o sasa.xvg -probe 0.14
+echo -e "Protein\n" | gmx sasa -s md.tpr -f md.xtc -o sasa.xvg -probe 0.14
 ```
 - `-probe 0.14`：探针半径设为 0.14 nm（水分子半径，默认值）
 - **用途**：模拟水分子在蛋白质表面的滚动探测

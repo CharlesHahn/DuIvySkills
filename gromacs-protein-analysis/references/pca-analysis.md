@@ -81,7 +81,7 @@ dit xvg_combine -f pc1.xvg pc2.xvg -c 0,1 1 -o pc12.xvg
 dit xvg_show_scatter -f pc12.xvg -c 1,2,0 -x "PC1" -y "PC2" -z "Time(ps)"
 ```
 - **xvg_combine 参数**：`-c 0,1 1` 表示从 pc1.xvg 取第 0,1 列（时间,PC1），从 pc2.xvg 取第 1 列（PC2）
-- **xvg_show_scatter 参数**：`-c 1,2,1` 指定合并后文件的 PC1（第1列）为 X 轴，PC2（第2列）为 Y 轴，时间列为Z轴，也就是用于颜色映射的数据。
+- **xvg_show_scatter 参数**：`-c 1,2,0` 指定 PC1（第1列）为 X 轴，PC2（第2列）为 Y 轴，第0列（时间）用于颜色映射
 
 ## 结果解释
 

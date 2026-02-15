@@ -13,7 +13,7 @@
 ### 命令
 
 ```bash
-echo -e "Protein" | gmx rmsf -s md.tpr -f md.xtc -o rmsf.xvg -res
+echo -e "Protein\n" | gmx rmsf -s md.tpr -f md.xtc -o rmsf.xvg -res
 ```
 - **目的**：计算每个残基的 RMSF，识别柔性区域
 - **参数说明**：
@@ -27,7 +27,7 @@ echo -e "Protein" | gmx rmsf -s md.tpr -f md.xtc -o rmsf.xvg -res
 ### 可选参数：输出 B 因子
 
 ```bash
-echo -e "Protein" | gmx rmsf -s md.tpr -f md.xtc -o rmsf.xvg -res -bf bfactor.pdb
+echo -e "Protein\n" | gmx rmsf -s md.tpr -f md.xtc -o rmsf.xvg -res -bf bfactor.pdb
 ```
 - `-bf bfactor.pdb`：输出带有 B 因子的 PDB 文件，用于结构可视化
 - **用途**：在 PyMOL 中用 `spectrum b, blue_white_red` 着色显示柔性区域
