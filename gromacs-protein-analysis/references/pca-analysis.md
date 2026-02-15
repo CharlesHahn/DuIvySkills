@@ -11,45 +11,69 @@
 - `-f`：轨迹文件（.xtc/.trr）
 
 ### 命令
+
 ```bash
 # 步骤 1：计算协方差矩阵和特征向量
-gmx covar -s md.tpr -f md.xtc -o eigenvalues.xvg -v eigenvectors.trr
+echo -e "C-alpha\nC-alpha\n" | gmx covar -s md.tpr -f md.xtc -o eigenvalues.xvg -v eigenvectors.trr
+```
+- **目的**：计算原子位置协方差矩阵并进行特征值分解
+- **参数说明**：
+  - `-s md.tpr`：输入拓扑文件
+  - `-f md.xtc`：输入轨迹文件
+  - `-o eigenvalues.xvg`：输出特征值文件，每个特征值对应一个主成分的方差贡献
+  - `-v eigenvectors.trr`：输出特征向量文件（TRR 格式），包含主成分的运动方向
+- **管道输入**：`"C-alpha\nC-alpha\n"` 第一次选择拟合组（消除整体运动），第二次选择计算协方差的原子组
+- **选择原因**：C-alpha 代表残基位置，计算效率高且结果易于解释
 
+```bash
 # 步骤 2：投影到主成分
 gmx anaeig -s md.tpr -f md.xtc -v eigenvectors.trr -first 1 -last 1 -proj pc1.xvg
 gmx anaeig -s md.tpr -f md.xtc -v eigenvectors.trr -first 2 -last 2 -proj pc2.xvg
+```
+- **目的**：将轨迹投影到指定主成分，获取时间序列
+- **参数说明**：
+  - `-v eigenvectors.trr`：输入特征向量文件（来自 covar 步骤）
+  - `-first 1 -last 1`：选择第 1 个主成分（PC1）
+  - `-proj pc1.xvg`：输出投影值时间序列
+- **原理**：投影值表示每一帧在主成分方向上的坐标，反映运动幅度
 
-# 步骤 3：提取极端构象
+```bash
+# 步骤 3：提取极端构象（可选）
 gmx anaeig -s md.tpr -f md.xtc -v eigenvectors.trr -first 1 -last 1 -extreme pc1_extreme.pdb
 ```
+- **目的**：提取 PC1 方向上的极端构象（最大和最小投影值对应的帧）
+- **参数说明**：
+  - `-extreme pc1_extreme.pdb`：输出极端构象 PDB 文件，包含两个结构
+- **用途**：可视化主成分运动方向，理解集体运动模式
 
-### 参数选择
+```bash
+# 步骤 4：提取平均结构（可选）
+gmx anaeig -s md.tpr -f md.xtc -v eigenvectors.trr -first 1 -last 1 -average average.pdb
+```
+- **目的**：提取平均结构
+- **参数说明**：
+  - `-average average.pdb`：输出平均结构 PDB 文件
 
-**原子组选择**（两次交互输入）：
-- **C-alpha**：Cα 原子，最常用（推荐）
-- **Backbone**：主链原子
-- **Protein**：所有蛋白质原子
+### 原子组选择
 
-**重要参数**：
-- `-o`：特征值输出文件
-- `-v`：特征向量输出文件（.trr 格式）
-- `-first/-last`：选择主成分编号
-- `-proj`：投影到指定主成分
-- `-extreme`：提取极端构象
-- `-average`：提取平均结构
+| 原子组 | 适用场景 | 说明 |
+|--------|---------|------|
+| C-alpha | 残基运动分析（推荐） | 每残基一个点，计算效率高 |
+| Backbone | 主链运动 | 包含更多自由度 |
+| Protein | 全原子运动 | 计算量大，需更多内存 |
 
 ### 输出
 - **eigenvalues.xvg**：特征值（PC 编号-特征值）
 - **eigenvectors.trr**：特征向量
-- **pc1.xvg, pc2.xvg**：投影到主成分
+- **pc1.xvg, pc2.xvg**：投影到主成分的时间序列
 - **pc1_extreme.pdb**：极端构象
 
 ### 可视化
 ```bash
-# 特征值谱
+# 特征值谱（贡献分布）
 dit xvg_show -f eigenvalues.xvg -x "PC Number" -y "Eigenvalue"
 
-# PC1 投影
+# PC1 投影时间序列
 dit xvg_show -f pc1.xvg -x "Time (ps)" -y "PC1 Coordinate"
 
 # PC1 vs PC2 散点图
@@ -59,25 +83,25 @@ dit xvg_show_scatter -f pc1.xvg pc2.xvg -x "PC1" -y "PC2"
 ## 结果解释
 
 ### 特征值分析
-- **第一个 PC**：最大特征值，最主要的运动
-- **累积方差**：前 N 个特征值之和 / 总方差
+- **特征值大小**：表示主成分捕获的方差，特征值越大贡献越大
 - **贡献百分比**：单个 PC 贡献 = 特征值 / 总方差 × 100%
+- **累积方差**：前 N 个特征值之和 / 总方差
 - **典型值**：前 3 个 PC 通常捕获 50-80% 的总运动
 
 ### PC 投影
-- **振幅**：投影范围表示运动大小
+- **振幅**：投影范围表示运动幅度
 - **时间尺度**：振荡频率与运动时间尺度相关
 - **转变**：跳跃或位移表示构象变化
 
 ### 生物学解释
-- **结构域运动**：大规模结构域间运动
+- **结构域运动**：大规模结构域间相对运动
 - **环灵活性**：环和末端的局部运动
 - **变构途径**：表示变构通讯的相关运动
 - **功能运动**：与活性相关的运动（铰链弯曲、通道开放）
 
 ## 常见问题
 
-**Q: 特征值显示均匀分布？**  
+**Q: 特征值分布均匀？**  
 A: 可能模拟时间不足或蛋白质刚性，延长模拟时间。
 
 **Q: PC 投影没有清晰模式？**  

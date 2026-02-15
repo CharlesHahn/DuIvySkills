@@ -1,4 +1,5 @@
 test/*
 *.zip
+.claude/*
 AGENTS.md
 
