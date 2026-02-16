@@ -1,4 +1,4 @@
-﻿---
+---
 name: gromacs-protein-analysis
 description: "用于分析和可视化 GROMACS 蛋白质分子动力学模拟结果的综合指南。当 Claude 需要执行轨迹分析时使用，包括：（1）蛋白质或蛋白质-配体复合物的周期性边界条件修正，（2）RMSD 分析以测量结构稳定性和收敛性，（3）RMSF 分析以评估每个残基的灵活性，（4）Gyrate 分析以评估蛋白质紧致性和折叠状态，（5）SASA 分析以研究溶剂可及性和表面性质，（6）动态互相关矩阵（DCCM）分析以研究相关原子运动，（7）残基距离接触矩阵（RDCM）以分析残基间接触，（8）主成分分析（PCA）以识别集体运动，（9）自由能景观（FEL）映射，使用 RMSD/Gyrate 或 PCA 理解构象状态"
 ---
@@ -17,24 +17,30 @@ description: "用于分析和可视化 GROMACS 蛋白质分子动力学模拟结
 
 本文档中的命令使用 `echo -e` 格式传递管道输入，适用于 Linux/macOS 或 Git Bash 环境。
 
-**Windows PowerShell 用户**请使用以下替代格式：
+**Windows CMD 用户**请使用以下替代格式：
 
-| Linux/Git Bash | Windows PowerShell |
-|----------------|-------------------|
-| `echo -e "Protein\n"` | `"Protein"` |
-| `echo -e "Protein\nProtein\n"` | `"Protein`nProtein"` |
-| `printf "text\n"` | `Write-Output "text"` |
+| Linux/Git Bash | Windows CMD |
+|----------------|-------------|
+| `echo -e "Protein\n" \| gmx cmd` | `cmd /c "(echo Protein) \| gmx cmd"` |
+| `echo -e "Protein\nProtein\n" \| gmx cmd` | `cmd /c "(echo Protein & echo Protein) \| gmx cmd"` |
+| `echo -e "C-alpha\nC-alpha\n" \| gmx anaeig ...` | `cmd /c "(echo C-alpha & echo C-alpha) \| gmx anaeig ..."` |
 
 **示例转换**：
 ```bash
 # Linux/Git Bash
 echo -e "Protein\nProtein\n" | gmx trjconv -s md.tpr -f md.xtc -o center.xtc -center
 
-# Windows PowerShell
-"Protein`nProtein" | gmx trjconv -s md.tpr -f md.xtc -o center.xtc -center
+# Windows CMD
+cmd /c "(echo Protein & echo Protein) | gmx trjconv -s md.tpr -f md.xtc -o center.xtc -center"
 ```
 
-**建议**：Windows 用户推荐使用 Git Bash 或 WSL 执行本文档中的命令。
+**Windows CMD 格式说明**：
+- 使用 `cmd /c` 启动 CMD 子进程执行命令
+- 使用 `(echo text & echo text)` 组合多个输入行
+- 每行输入之间用 `&` 分隔
+- 整个管道命令用双引号包裹
+
+**建议**：Windows 用户推荐使用 Git Bash 或 WSL 执行本文档中的命令，或使用上述 CMD 格式。
 
 ## 分析类型
 
