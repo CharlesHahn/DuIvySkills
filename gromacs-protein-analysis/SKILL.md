@@ -229,6 +229,7 @@ cmd /c "(echo Protein & echo Protein) | gmx trjconv -s md.tpr -f md.xtc -o cente
 - 使用 `gmx make_ndx` 创建适当的索引组
 - 确保索引组符合分析要求
 - 记录索引组的组成
+- **查看索引文件内容**：使用 `dit ndx_show -f index.ndx` 快速查看 .ndx 文件中包含的所有原子组名称和原子数
 
 ## 何时调用 DuIvyTools-Skills
 
@@ -240,6 +241,14 @@ cmd /c "(echo Protein & echo Protein) | gmx trjconv -s md.tpr -f md.xtc -o cente
 - **统计分析**：计算平均值、分布
 
 ## 故障排除
+
+### 错误处理原则
+
+**遇到错误时，按以下优先级寻求解决方案**：
+1. **首选**：查询本技能包的参考文档（`references/` 目录下的详细指南）
+2. **次选**：查询 `gromacs-skills` 或 `duivytools-skills` 相关文档
+3. **最后**：仅当技能文档无相关内容时，才进行联网搜索或自行测试
+4. **禁止**：猜测参数或随意尝试命令
 
 ### 常见问题
 
