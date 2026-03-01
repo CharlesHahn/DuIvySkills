@@ -1,6 +1,6 @@
 ---
 name: duivyprocedures-skills
-description: "YAML-driven batch analysis tool for MD simulations. Use when Claude needs to: (1) Run multiple analyses in one command via YAML config, (2) Batch process multiple trajectories, (3) Auto-generate figures and data files. NOT for single-file visualization (use duivytools-skills instead)."
+description: "Guide for DuIvyProcedures (DIP), a YAML-driven batch MD analysis tool. Use when Claude needs to perform MD analysis including: RMSD, RMSF, Gyrate, SASA, DCCM, PCA, FEL, dPCA, Hbond, DSSP, clustering, Density, DensityMap, RDF, RDCM, MSM, tICA, tSNE, UMAP, PiStacking, PiCation, SaltBridge, Hydrophobic Contact, SPM. Ideal for: (1) running multiple analyses in one command, (2) processing multiple trajectories. NOT for: visualizing existing XVG/XPM files without analysis (use duivytools-skills), learning analysis theory (use gromacs-protein-analysis)."
 ---
 
 # DuIvyProcedures (DIP)
